@@ -19,5 +19,6 @@ setup(
         'requests',  # http integration
         'deap', # evolutionary computation
         'pathos' # parallel python module
+        'elasticsearch' # elasticsearch integration
     ]
 )
