@@ -145,38 +145,39 @@ if __name__ == '__main__':
     except:
         target_systems_count = 1
 
-    execution_strategy = {
-        "ignore_first_n_results": 3000,
-        "sample_size": 5000,
-        "type": "self_optimizer",
-        "optimizer_method": "gauss",
-        "optimizer_iterations": 20,
-        "optimizer_random_starts": 8,
-        "knobs": {
-            "route_random_sigma": (0.0, 0.4),
+    # execution_strategy = {
+    #     "ignore_first_n_results": 3000,
+    #     "sample_size": 5000,
+    #     "type": "self_optimizer",
+    #     "optimizer_method": "gauss",
+    #     "optimizer_iterations": 20,
+    #     "optimizer_random_starts": 8,
+    #     "knobs": {
+    #         "route_random_sigma": (0.0, 0.4),
             # "exploration_percentage": (0.0, 0.3),
             # "max_speed_and_length_factor": (1.0, 2.5),
             # "average_edge_duration_factor": (1.0, 2.5),
             # "freshness_update_factor": (5, 20),
-            "freshness_cut_off_value": (100, 700),
+            # "freshness_cut_off_value": (100, 700),
             # "re_route_every_ticks": (10, 70),
-        }
-    }
-
-    # execution_strategy = {
-    #     "ignore_first_n_results": 3000,
-    #     "sample_size": 10000,
-    #     "type": "step_explorer",
-    #     "knobs": {
-    #         "route_random_sigma": ([0.0, 0.3], 0.3),
-    #         "exploration_percentage": ([0.0, 0.3], 0.3),
-    #         "max_speed_and_length_factor": ([1.0, 2.5], 1.5),
-    #         "average_edge_duration_factor": ([1.0, 2.5], 1.5),
-    #         "freshness_update_factor": ([5, 20], 15),
-    #         "freshness_cut_off_value": ([100, 700], 600),
-    #         "re_route_every_ticks": ([10, 70], 60),
     #     }
     # }
+
+    execution_strategy = {
+        "ignore_first_n_results": 3000,
+        "sample_size": 5000,
+        "type": "step_explorer",
+        "knobs": {
+            # "route_random_sigma": ([0.0, 0.3], 0.3),
+            # "exploration_percentage": ([0.0, 0.3], 0.3),
+            # "max_speed_and_length_factor": ([1.0, 2.5], 1.5),
+            # "average_edge_duration_factor": ([1.0, 2.5], 1.5),
+            # "freshness_update_factor": ([5, 20], 15),
+            # "freshness_cut_off_value": ([100, 700], 600),
+            # "re_route_every_ticks": ([10, 70], 60),
+            "total_car_counter": ([100, 800], 50)
+        }
+    }
 
     # execution_strategy = {
     #     "ignore_first_n_results": 3000,
