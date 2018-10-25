@@ -200,9 +200,12 @@ if __name__ == '__main__':
         target_system_names.append(target_system_name)
         db().save_target_system(target_system_name, TestData.primary_data_provider, TestData.change_provider)
 
-    # execution_strategies = get_execution_strategies(execution_strategy, target_system_names)
-    execution_strategies = {}
-    execution_strategies[target_system_names[0]] = execution_strategy
+    ### sequential or step strategy:
+    execution_strategies = get_execution_strategies(execution_strategy, target_system_names)
+    
+    ### bayesian strategy:
+    # execution_strategies = {}
+    # execution_strategies[target_system_names[0]] = execution_strategy
 
     import time
     start = time.time()
