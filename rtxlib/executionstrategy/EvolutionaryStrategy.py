@@ -16,6 +16,10 @@ from rtxlib.execution import experimentFunction
 import random
 from deap import tools
 from deap import base, creator
+import pathos
+
+from rtxlib.changeproviders import init_change_provider
+from rtxlib.dataproviders import init_data_providers
 
 crowdnav_instance_number = 0
 
@@ -82,16 +86,26 @@ def ga(variables, range_tuples, wf):
 
     pop = toolbox.population(n=population_size)
 
-    info("Individual: " + str(variables))
+    info("Variables: " + str(variables))
     info("Population: " + str(pop))
 
     toolbox.register("mate", tools.cxOnePoint)
     toolbox.register("mutate", mutate, variables=variables, range_tubles=range_tuples)
     toolbox.register("select", tools.selTournament, tournsize=3)
+
+    # we need to delete these entries since they cannot be serialized
+    del wf.change_provider["instance"]
+    del wf.primary_data_provider["instance"]
     toolbox.register("evaluate", evaluate, vars=variables, ranges=range_tuples, wf=wf)
 
     # Evaluate the entire population
-    fitnesses = map(toolbox.evaluate, pop)
+    number_individuals_to_evaluate_in_parallel = wf.execution_strategy["population_size"]
+    pool = pathos.multiprocessing.ProcessPool(number_individuals_to_evaluate_in_parallel)
+    zipped = zip(pop,range(number_individuals_to_evaluate_in_parallel))
+    if wf.execution_strategy["parallel_execution_of_individuals"]:
+        fitnesses = pool.map(toolbox.evaluate, zipped)
+    else:
+        fitnesses = map(toolbox.evaluate, zipped)
 
     for ind, fit in zip(pop, fitnesses):
         info("> " + str(ind) + " -- " + str(fit))
@@ -118,7 +132,11 @@ def ga(variables, range_tuples, wf):
 
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        fitnesses = map(toolbox.evaluate, invalid_ind)
+        zipped = zip(invalid_ind,range(number_individuals_to_evaluate_in_parallel))
+        if wf.execution_strategy["parallel_execution_of_individuals"]:
+            fitnesses = pool.map(toolbox.evaluate, zipped)
+        else:
+            fitnesses = map(toolbox.evaluate, zipped)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
@@ -157,14 +175,18 @@ def mutate(individual, variables, range_tubles):
 
 
 def evaluate(individual, vars, ranges, wf):
+    # we recreate here the instances of the change provider and data provider that we deleted before
+    init_change_provider(wf)
+    init_data_providers(wf)
     result = evolutionary_execution(wf, individual, vars)
     info("> RESULT: " + str(result), Fore.RED)
     return result,
 
 
-def evolutionary_execution(wf, opti_values, variables):
-    global crowdnav_instance_number
+def evolutionary_execution(wf, individual, variables):
 
+    opti_values = individual[0]
+    crowdnav_id = individual[1]
     """ this is the function we call and that returns a value for optimization """
     knob_object = recreate_knob_from_optimizer_values(variables, opti_values)
     # create a new experiment to run in execution
@@ -173,14 +195,10 @@ def evolutionary_execution(wf, opti_values, variables):
     # TODO where do we start multiple threads to call the experimentFunction concurrently, once for each experiment and crowdnav instance?
     # TODO should we create new/fresh CrowdNav instances for each iteration/generation? Otherwise, we use the same instance to evaluate across interations/generations to evaluate individiuals.
 
-    if wf.execution_strategy["parallel_execution_of_individuals"]:
-        wf.primary_data_provider["instance"].topic = original_primary_data_provider_topic + "-" + str(crowdnav_instance_number)
-        wf.change_provider["instance"].topic = original_change_provider_topic + "-" + str(crowdnav_instance_number)
-        info("Listering on " + wf.primary_data_provider["instance"].topic)
-        info("Posting changes to " + wf.change_provider["instance"].topic)
-        crowdnav_instance_number = crowdnav_instance_number + 1
-        if crowdnav_instance_number == wf.execution_strategy["population_size"]:
-            crowdnav_instance_number = 0
+    wf.primary_data_provider["instance"].topic = original_primary_data_provider_topic + "-" + str(crowdnav_id)
+    wf.change_provider["instance"].topic = original_change_provider_topic + "-" + str(crowdnav_id)
+    info("Listening to " + wf.primary_data_provider["instance"].topic)
+    info("Posting changes to " + wf.change_provider["instance"].topic)
 
     exp["ignore_first_n_results"] = wf.execution_strategy["ignore_first_n_results"]
     exp["sample_size"] = wf.execution_strategy["sample_size"]

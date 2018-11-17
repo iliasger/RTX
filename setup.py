@@ -17,6 +17,7 @@ setup(
         'seaborn',  # plotting lib
         'paho-mqtt',  # mqtt integration
         'requests',  # http integration
-        'deap'  # evolutionary computation
+        'deap', # evolutionary computation
+        'pathos' # parallel python module
     ]
 )
