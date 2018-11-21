@@ -50,7 +50,7 @@ def nsga2(variables, range_tuples, init_individual, mutate, evaluate, wf):
     toolbox.decorate("mutate", history.decorator)
 
     # initializing the population
-    print "Init the population"
+    info("Init the population")
     population = toolbox.population(n=population_size)
 
     # update history
@@ -91,18 +91,18 @@ def nsga2(variables, range_tuples, init_individual, mutate, evaluate, wf):
     record = stats.compile(population) if stats is not None else {}
     logbook.record(gen=0, nevals=len(population), **record)
     if verbose:
-        print logbook.stream
+        info(logbook.stream)
 
     # for each iteration/generation
     for gen in range(1, optimizer_iterations + 1):
         if debug:
-            print "\n" + str(gen) + ". Generation"
-            print "Population    : " + str(population)
+            info("\n" + str(gen) + ". Generation")
+            info("Population    : " + str(population))
 
         # Vary the population
         offspring = vary(population, toolbox, offspring_size, crossover_probability, mutation_probability)
         if debug:
-            print "Offspring     : " + str(offspring)
+            info("Offspring     : " + str(offspring))
 
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
@@ -119,14 +119,13 @@ def nsga2(variables, range_tuples, init_individual, mutate, evaluate, wf):
             ind.fitness.values = fit
 
         # Update the hall of fame with the generated individuals
-        # print "### Updating Hall of Fame ..."
         if hall_of_fame is not None:
             hall_of_fame.update(offspring)
 
         # Select the next generation population
-        population[:] = toolbox.select(population + offspring, POP_SIZE)
+        population[:] = toolbox.select(population + offspring, population_size)
         if debug:
-            print "New Population: " + str(population)
+            info("New Population: " + str(population))
 
         if debug:
             for i in range(len(population)):
@@ -134,21 +133,17 @@ def nsga2(variables, range_tuples, init_individual, mutate, evaluate, wf):
                     if i != j:
                         dup = is_duplicate(population[i], population[j])
                         if dup:
-                            print "Duplicate individuals #" + str(i) + " and #" + str(j)
+                            info("Duplicate individuals #" + str(i) + " and #" + str(j))
 
         # Update the statistics with the new population
         record = stats.compile(population) if stats is not None else {}
         logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
-            print logbook.stream
+            info(logbook.stream)
 
-        # print str(variables)
-        # print str(range_tuples)
-        # print str(population)
-
-    print "\nDONE\n"
-    print str(population)
-    print str(hall_of_fame)
+    info("\nDONE\n")
+    info("Population: " + str(population))
+    info("Hall of Fame: " + str(hall_of_fame))
 
 
 def vary(population, toolbox, lambda_, cxpb, mutpb):
@@ -165,7 +160,7 @@ def vary(population, toolbox, lambda_, cxpb, mutpb):
             del ind1.fitness.values
             offspring.append(ind1)
             if debug:
-                print "Obtained by crossover " + str(ind1) + " from " + msg
+                info("Obtained by crossover " + str(ind1) + " from " + msg)
         elif op_choice < cxpb + mutpb:  # Apply mutation
             ind = toolbox.clone(random.choice(population))
             msg = str(ind)
@@ -173,7 +168,7 @@ def vary(population, toolbox, lambda_, cxpb, mutpb):
             del ind.fitness.values
             offspring.append(ind)
             if debug:
-                print "Obtained by mutation " + str(ind) + " from " + msg
+                info("Obtained by mutation " + str(ind) + " from " + msg)
         else:  # Apply reproduction
             offspring.append(random.choice(population))
 
