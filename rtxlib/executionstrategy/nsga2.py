@@ -23,7 +23,7 @@ def nsga2(variables, range_tuples, init_individual, mutate, evaluate, wf):
         crossover_probability) + "\nmutation_probability: " + str(
         mutation_probability))
 
-    creator.create("FitnessMin", base.Fitness, weights=(-1000.0,))  # TODO add second objective
+    creator.create("FitnessMin", base.Fitness, weights=(-1000.0, -1))
     creator.create("Individual", list, fitness=creator.FitnessMin)
 
     toolbox = base.Toolbox()

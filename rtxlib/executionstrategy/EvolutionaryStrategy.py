@@ -87,8 +87,14 @@ def evaluate(individual_and_id, vars, ranges, wf):
     init_change_provider(wf)
     init_data_providers(wf)
     result = evolutionary_execution(wf, individual_and_id, vars)
-    info("> RESULT: " + str(result), Fore.RED)
-    return result,
+    if wf.execution_strategy["is_multi_objective"]:
+        # result is a tuple (trip overhead, complaints)
+        info("> RESULT: " + str(result), Fore.RED)
+        return result
+    else:
+        # just return the trip overhead
+        info("> RESULT: " + str(result[0]), Fore.RED)
+        return result[0],
 
 
 def evolutionary_execution(wf, individual_and_id, variables):

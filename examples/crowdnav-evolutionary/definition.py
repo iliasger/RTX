@@ -10,9 +10,10 @@ execution_strategy = {
     "sample_size": 20, #10000,
     "type": "evolutionary",
     "optimizer_method": "NSGAII", # "GA"
+    "is_multi_objective": True,
     "optimizer_iterations": 4, # number of generations
     "population_size": 3, # number of individuals in the population
-    "offspring_size" : 3, # typically equals the population size
+    "offspring_size": 3, # typically equals the population size
     "crossover_probability": 0.5,
     "mutation_probability": 0.2,
     "knobs": {
@@ -31,6 +32,7 @@ def primary_data_reducer(state, newData, wf):
     cnt = state["count"]
     state["avg_overhead"] = (state["avg_overhead"] * cnt + newData["overhead"]) / (cnt + 1)
     state["count"] = cnt + 1
+    state["complaints"] += newData["complaint"]
     return state
 
 
@@ -54,10 +56,11 @@ change_provider = {
 # defines what the experimentFunction returns
 def evaluator(resultState, wf):
     # avg oveahead computed by primary_data_reducer
-    return resultState["avg_overhead"]
+    return resultState["avg_overhead"], resultState["complaints"]
 
 
 def state_initializer(state, wf):
     state["count"] = 0
     state["avg_overhead"] = 0
+    state["complaints"] = 0
     return state
