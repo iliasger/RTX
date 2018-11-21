@@ -1,3 +1,7 @@
+#
+# The GA from the DEAP tutorial: https://deap.readthedocs.io/en/master/overview.html
+#
+
 import pathos
 import random
 
