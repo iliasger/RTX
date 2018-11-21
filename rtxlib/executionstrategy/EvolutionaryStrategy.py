@@ -14,14 +14,13 @@ from rtxlib import info, error
 from rtxlib.execution import experimentFunction
 
 import random
-from deap import tools
 from deap import base, creator
-import pathos
+
+from ga import ga
 
 from rtxlib.changeproviders import init_change_provider
 from rtxlib.dataproviders import init_data_providers
 
-crowdnav_instance_number = 0
 
 def start_evolutionary_strategy(wf):
     global original_primary_data_provider_topic
@@ -35,7 +34,6 @@ def start_evolutionary_strategy(wf):
     original_primary_data_provider_topic = wf.primary_data_provider["instance"].topic
     original_change_provider_topic = wf.change_provider["instance"].topic
 
-
     # we look at the ranges the user has specified in the knobs
     knobs = wf.execution_strategy["knobs"]
     # we create a list of variable/knob names and a list of ranges (from,to) for each knob
@@ -48,7 +46,7 @@ def start_evolutionary_strategy(wf):
 
     info("> Run Optimizer | " + optimizer_method, Fore.CYAN)
     if optimizer_method == "GA":
-        ga(variables, range_tuples, wf)
+        ga(variables, range_tuples, random_knob_config, mutate, evaluate, wf)
     elif optimizer_method == "NSGAII":
         nsga2(variables, range_tuples, wf)
 
@@ -66,84 +64,6 @@ def nsga2(variables, range_tuples, wf):
     # some functionality for NSGA-II is provided by DEAP such as:
     # selection
     # tools.selNSGA2(...)
-
-
-def ga(variables, range_tuples, wf):
-    optimizer_iterations = wf.execution_strategy["optimizer_iterations"]
-    population_size = wf.execution_strategy["population_size"]
-    crossover_probability = wf.execution_strategy["crossover_probability"]
-    mutation_probability = wf.execution_strategy["mutation_probability"]
-    info("> Parameters:\noptimizer_iterations: " + str(optimizer_iterations) + "\npopulation_size: " + str(
-        population_size) + "\ncrossover_probability: " + str(crossover_probability) + "\nmutation_probability: " + str(
-        mutation_probability))
-
-    creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-    creator.create("Individual", list, fitness=creator.FitnessMin)
-
-    toolbox = base.Toolbox()
-    toolbox.register("individual", random_knob_config, variables=variables, range_tubles=range_tuples)
-    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-
-    pop = toolbox.population(n=population_size)
-
-    info("Variables: " + str(variables))
-    info("Population: " + str(pop))
-
-    toolbox.register("mate", tools.cxOnePoint)
-    toolbox.register("mutate", mutate, variables=variables, range_tubles=range_tuples)
-    toolbox.register("select", tools.selTournament, tournsize=3)
-
-    # we need to delete these entries since they cannot be serialized
-    del wf.change_provider["instance"]
-    del wf.primary_data_provider["instance"]
-    toolbox.register("evaluate", evaluate, vars=variables, ranges=range_tuples, wf=wf)
-
-    # Evaluate the entire population
-    number_individuals_to_evaluate_in_parallel = wf.execution_strategy["population_size"]
-    pool = pathos.multiprocessing.ProcessPool(number_individuals_to_evaluate_in_parallel)
-    zipped = zip(pop,range(number_individuals_to_evaluate_in_parallel))
-    if wf.execution_strategy["parallel_execution_of_individuals"]:
-        fitnesses = pool.map(toolbox.evaluate, zipped)
-    else:
-        fitnesses = map(toolbox.evaluate, zipped)
-
-    for ind, fit in zip(pop, fitnesses):
-        info("> " + str(ind) + " -- " + str(fit))
-        ind.fitness.values = fit
-
-    for g in range(optimizer_iterations):
-        info("> \n" + str(g) + ". Generation")
-        # Select the next generation individuals
-        offspring = toolbox.select(pop, len(pop))
-        # Clone the selected individuals
-        offspring = map(toolbox.clone, offspring)
-
-        # Apply crossover and mutation on the offspring
-        for child1, child2 in zip(offspring[::2], offspring[1::2]):
-            if random.random() < crossover_probability:
-                toolbox.mate(child1, child2)
-                del child1.fitness.values
-                del child2.fitness.values
-
-        for mutant in offspring:
-            if random.random() < mutation_probability:
-                toolbox.mutate(mutant)
-                del mutant.fitness.values
-
-        # Evaluate the individuals with an invalid fitness
-        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        zipped = zip(invalid_ind,range(number_individuals_to_evaluate_in_parallel))
-        if wf.execution_strategy["parallel_execution_of_individuals"]:
-            fitnesses = pool.map(toolbox.evaluate, zipped)
-        else:
-            fitnesses = map(toolbox.evaluate, zipped)
-        for ind, fit in zip(invalid_ind, fitnesses):
-            ind.fitness.values = fit
-
-        # The population is entirely replaced by the offspring
-        pop[:] = offspring
-        info("> Population: " + str(pop))
-        info("> Individual: " + str(variables))
 
 
 def random_knob_config(variables, range_tubles):
@@ -195,8 +115,12 @@ def evolutionary_execution(wf, individual, variables):
     # TODO where do we start multiple threads to call the experimentFunction concurrently, once for each experiment and crowdnav instance?
     # TODO should we create new/fresh CrowdNav instances for each iteration/generation? Otherwise, we use the same instance to evaluate across interations/generations to evaluate individiuals.
 
-    wf.primary_data_provider["instance"].topic = original_primary_data_provider_topic + "-" + str(crowdnav_id)
-    wf.change_provider["instance"].topic = original_change_provider_topic + "-" + str(crowdnav_id)
+    suffix = ""
+    if wf.execution_strategy["parallel_execution_of_individuals"]:
+        suffix = "-" + str(crowdnav_id)
+
+    wf.primary_data_provider["instance"].topic = original_primary_data_provider_topic + suffix
+    wf.change_provider["instance"].topic = original_change_provider_topic + suffix
     info("Listening to " + wf.primary_data_provider["instance"].topic)
     info("Posting changes to " + wf.change_provider["instance"].topic)
 
