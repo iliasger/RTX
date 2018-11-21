@@ -81,6 +81,7 @@ def mutate(individual, variables, range_tubles):
     return individual,
 
 
+# TODO reuse earlier results if the same individual should be evaluated again
 def evaluate(individual_and_id, vars, ranges, wf):
     # we recreate here the instances of the change provider and data provider that we deleted before
     init_change_provider(wf)
