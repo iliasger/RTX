@@ -6,6 +6,8 @@ from deap import tools, base, creator
 
 
 def ga(variables, range_tuples, init_individual, mutate, evaluate, wf):
+    random.seed()
+
     optimizer_iterations = wf.execution_strategy["optimizer_iterations"]
     population_size = wf.execution_strategy["population_size"]
     crossover_probability = wf.execution_strategy["crossover_probability"]
@@ -18,7 +20,7 @@ def ga(variables, range_tuples, init_individual, mutate, evaluate, wf):
     creator.create("Individual", list, fitness=creator.FitnessMin)
 
     toolbox = base.Toolbox()
-    toolbox.register("individual", init_individual, variables=variables, range_tubles=range_tuples)
+    toolbox.register("individual", init_individual, variables=variables, range_tuples=range_tuples)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
     pop = toolbox.population(n=population_size)
@@ -33,6 +35,7 @@ def ga(variables, range_tuples, init_individual, mutate, evaluate, wf):
     # we need to delete these entries since they cannot be serialized
     del wf.change_provider["instance"]
     del wf.primary_data_provider["instance"]
+
     toolbox.register("evaluate", evaluate, vars=variables, ranges=range_tuples, wf=wf)
 
     # Evaluate the entire population

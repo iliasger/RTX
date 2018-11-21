@@ -17,6 +17,7 @@ import random
 from deap import base, creator
 
 from ga import ga
+from nsga2 import nsga2
 
 from rtxlib.changeproviders import init_change_provider
 from rtxlib.dataproviders import init_data_providers
@@ -48,27 +49,12 @@ def start_evolutionary_strategy(wf):
     if optimizer_method == "GA":
         ga(variables, range_tuples, random_knob_config, mutate, evaluate, wf)
     elif optimizer_method == "NSGAII":
-        nsga2(variables, range_tuples, wf)
+        nsga2(variables, range_tuples, random_knob_config, mutate, evaluate, wf)
 
 
-def nsga2(variables, range_tuples, wf):
-    optimizer_iterations = wf.execution_strategy["optimizer_iterations"]
-    population_size = wf.execution_strategy["population_size"]
-    crossover_probability = wf.execution_strategy["crossover_probability"]
-    mutation_probability = wf.execution_strategy["mutation_probability"]
-    info("> Parameters:\noptimizer_iterations: " + str(optimizer_iterations) + "\npopulation_size: " + str(
-        population_size) + "\ncrossover_probability: " + str(crossover_probability) + "\nmutation_probability: " + str(
-        mutation_probability))
-    # TODO implement NSGA-II
-
-    # some functionality for NSGA-II is provided by DEAP such as:
-    # selection
-    # tools.selNSGA2(...)
-
-
-def random_knob_config(variables, range_tubles):
+def random_knob_config(variables, range_tuples):
     knob_config = []
-    for x, tuble in zip(variables, range_tubles):
+    for x, tuble in zip(variables, range_tuples):
         if x == "route_random_sigma" or x == "exploration_percentage" \
                 or x == "max_speed_and_length_factor" or x == "average_edge_duration_factor":
             value = random.uniform(tuble[0], tuble[1])
@@ -92,21 +78,22 @@ def mutate(individual, variables, range_tubles):
             or variables[i] == "re_route_every_ticks":
         value = random.randint(range_tubles[i][0], range_tubles[i][1])
         individual[i] = value
+    return individual,
 
 
-def evaluate(individual, vars, ranges, wf):
+def evaluate(individual_and_id, vars, ranges, wf):
     # we recreate here the instances of the change provider and data provider that we deleted before
     init_change_provider(wf)
     init_data_providers(wf)
-    result = evolutionary_execution(wf, individual, vars)
+    result = evolutionary_execution(wf, individual_and_id, vars)
     info("> RESULT: " + str(result), Fore.RED)
     return result,
 
 
-def evolutionary_execution(wf, individual, variables):
+def evolutionary_execution(wf, individual_and_id, variables):
 
-    opti_values = individual[0]
-    crowdnav_id = individual[1]
+    opti_values = individual_and_id[0]
+    crowdnav_id = individual_and_id[1]
     """ this is the function we call and that returns a value for optimization """
     knob_object = recreate_knob_from_optimizer_values(variables, opti_values)
     # create a new experiment to run in execution

@@ -2,16 +2,17 @@
 name = "CrowdNav-Evolutionary"
 
 execution_strategy = {
-    "parallel_execution_of_individuals": True, # if this is True, CrowdNav should be run with 'python parallel.py <no>'
+    "parallel_execution_of_individuals": False, # if this is True, CrowdNav should be run with 'python parallel.py <no>'
     # where <no> is equal to the "population_size" below
     # the parallel execution creates as many processes as the "population_size" below
     # the non-parallel execution runs everything in the same process.. (good for debugging!)
     "ignore_first_n_results": 20, #10000,
     "sample_size": 20, #10000,
     "type": "evolutionary",
-    "optimizer_method": "GA",
+    "optimizer_method": "NSGAII", # "GA"
     "optimizer_iterations": 4, # number of generations
     "population_size": 3, # number of individuals in the population
+    "offspring_size" : 3, # typically equals the population size
     "crossover_probability": 0.5,
     "mutation_probability": 0.2,
     "knobs": {
