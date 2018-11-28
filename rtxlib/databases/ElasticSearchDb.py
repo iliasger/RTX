@@ -49,7 +49,7 @@ class ElasticSearchDb(Database):
             if not self.indices_client.exists(self.index):
                 self.indices_client.create(self.index, body)
         except TransportError:
-            error("Error while creating elasticsearch. Check type mappings in config.json.")
+            error("Error while creating elasticsearch. Check type mappings in oeda_config.json.")
             print(traceback.format_exc())
             exit(0)
 

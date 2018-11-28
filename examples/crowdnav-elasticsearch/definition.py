@@ -10,7 +10,7 @@ def state_initializer(state, wf):
     return state
 
 def primary_data_reducer(state, newData, wf):
-    wf.db.save_data_point(wf.experimentCounter, wf.current_knobs, newData, state["data_points"], wf.analysis_id)
+    wf.db.save_data_point(wf.experimentCounter, wf.current_knobs, newData, state["data_points"], wf.rtx_run_id)
     state["data_points"] += 1
     return state
 

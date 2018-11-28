@@ -1,0 +1,30 @@
+RTX can be configured to use Elasticsearch to save all experiment data, including configurations,
+workflow runs and raw data.
+
+To use elasticsearch with RTX, you need to:
+
+(1)
+* Either download version 5.6.1 (zip/package/installer) from
+    https://www.elastic.co/guide/en/elasticsearch/reference/5.6/install-elasticsearch.html
+* Or run it inside a Docker container.
+    For preview, a good docker image is the one available here (which also includes Kibana for data visualization):
+    https://hub.docker.com/r/nshou/elasticsearch-kibana/
+    To use version 5.6.1 of the above docker image, you need to
+            (1) Pull it: docker pull nshou/elasticsearch-kibana:kibana5
+            (2) Run it:  docker run -d -p 9200:9200 -p 5601:5601 --name elastic5 nshou/elasticsearch-kibana:kibana5
+
+    Note: If you run it with the above command, you can always stop it by 'docker start elastic5'
+    and restart it by 'docker stop elastic5'
+
+(2)
+Rename the "oeda_config.json.template" file to "oeda_config.json" and make any necessary changes.
+In the default configuration, elasticsearch listens to localhost:9200.
+
+(3)
+To verify that Elasticsearch is configured fine, try to run examples/crowdnav-elasticsearch:
+    python rtx.py start examples/crowdnav-elasticsearch
+after this workflow finishes, you should check that there have been 21 new documents inserted to the 'rtx' index
+of your elasticsearch server. You can check this using kibana at http://localhost:5601
+The 21 documents are
+   - 20 documents of data points that were collected
+   - 1 document of the rtx_run (workflow run) that was performed.

@@ -19,9 +19,6 @@ setup(
         'requests',  # http integration
         'deap', # evolutionary computation
         'pathos', # parallel python module
-        'elasticsearch,' # elasticsearch integration
-        'numpy', # scientific computing
-        'scipy', # numerics and statistics
-        'statsmodels' # statistics and statistical testing
+        'elasticsearch' # elasticsearch integration
     ]
 )

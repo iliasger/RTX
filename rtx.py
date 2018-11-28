@@ -1,14 +1,9 @@
 #!/usr/bin/python
 import sys
 import imp
-<<<<<<< HEAD
-from elasticsearch import Elasticsearch
-from datetime import datetime
-
-=======
 import json
->>>>>>> 1d542fd68e57883c1e5e95ed53ea657a0a2f499e
 import rtxlib
+import os
 
 from colorama import Fore
 from rtxlib import info, error, debug
@@ -43,12 +38,15 @@ if __name__ == '__main__':
     if len(sys.argv) > 2 and sys.argv[1] == "start":
         wf = loadDefinition(sys.argv[2])
 
-        with open('rtx_config.json') as json_data_file:
-            try:
-                config_data = json.load(json_data_file)
-            except ValueError:
-                # config.json is empty - default configuration used
-                config_data = []
+        if os.path.isfile('oeda_config.json'):
+            with open('oeda_config.json') as json_data_file:
+                try:
+                    config_data = json.load(json_data_file)
+                except ValueError:
+                    # config.json is empty - default configuration used
+                    config_data = []
+        else:
+            config_data = []
 
         # check for database configuration
         if "database" in config_data:
