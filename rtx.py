@@ -1,14 +1,21 @@
 #!/usr/bin/python
 import sys
 import imp
+<<<<<<< HEAD
 from elasticsearch import Elasticsearch
 from datetime import datetime
 
+=======
+import json
+>>>>>>> 1d542fd68e57883c1e5e95ed53ea657a0a2f499e
 import rtxlib
 
+from colorama import Fore
 from rtxlib import info, error, debug
 from rtxlib.workflow import execute_workflow
 from rtxlib.report import plot
+from rtxlib.databases import create_instance
+from rtxlib.databases import get_no_database
 
 
 def loadDefinition(folder):
@@ -36,17 +43,29 @@ if __name__ == '__main__':
     if len(sys.argv) > 2 and sys.argv[1] == "start":
         wf = loadDefinition(sys.argv[2])
 
-        es = Elasticsearch()
-        res = es.index(index="rtx-analysis", doc_type=wf.type, body=wf.execution_strategy)
+        with open('config.json') as json_data_file:
+            try:
+                config_data = json.load(json_data_file)
+            except ValueError:
+                # config.json is empty - default configuration used
+                config_data = []
+
+        # check for database configuration
+        if "database" in config_data:
+            database_config = config_data["database"]
+            info("> RTX configuration: Using " + database_config["type"] + " database.", Fore.CYAN)
+            db = create_instance(database_config)
+            wf.analysis_id = db.save_analysis(wf.analysis, wf.execution_strategy)
+            wf.db = db
+        else:
+            info("> RTX configuration: No database specified.", Fore.CYAN)
+            wf.analysis_id = "-1"
+            wf.db = get_no_database()
 
         # setting global variable log_folder for logging and clear log
         rtxlib.LOG_FOLDER = wf.folder
         rtxlib.clearOldLog()
         info("> Starting RTX experiment...")
-
-        wf.es = es
-        wf.dt = datetime
-        wf.analysis_id = res['_id']
 
         execute_workflow(wf)
         plot(wf)

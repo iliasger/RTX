@@ -1,21 +1,17 @@
-# Simple sequantial run of knob values
+# Simple sequential run of knob values
 name = "CrowdNav-Sequential"
-type = "t-test"
+analysis = "t-test"
 
 def evaluator(resultState, wf):
     return wf.experimentCounter
 
 def state_initializer(state, wf):
-    state["data_points"] = 1
+    state["data_points"] = 0
     return state
 
 def primary_data_reducer(state, newData, wf):
-    newData['timestamp'] = wf.dt.now()
-    newData['analysis_id'] = wf.analysis_id
-    doc_type = 'experiment_' + str(wf.experimentCounter)
-    res = wf.es.index(index="rtx-datapoint", doc_type=doc_type, id=state["data_points"], body=newData)
-
-    state["data_points"] = state["data_points"] + 1
+    wf.db.save_data_point(wf.experimentCounter, wf.current_knobs, newData, state["data_points"], wf.analysis_id)
+    state["data_points"] += 1
     return state
 
 

@@ -45,7 +45,7 @@ def experimentFunction(wf, exp):
     if hasattr(wf, "experimentCounter"):
         wf.experimentCounter += 1
     else:
-        wf.experimentCounter = 1
+        wf.experimentCounter = 0
 
     # start collecting data
     sample_size = exp["sample_size"]
@@ -55,15 +55,20 @@ def experimentFunction(wf, exp):
             # we start with the primary data provider using blocking returnData
             new_data = wf.primary_data_provider["instance"].returnData()
             if new_data is not None:
+                wf.current_knobs = exp["knobs"]
+                exp["state"] = wf.primary_data_provider["data_reducer"](exp["state"], new_data, wf)
+
                 try:
+                    pass
                     # print(new_data)
-                    exp["state"] = wf.primary_data_provider["data_reducer"](exp["state"], new_data,wf)
+                    # wf.current_knobs = exp["knobs"]
+                    # exp["state"] = wf.primary_data_provider["data_reducer"](exp["state"], new_data, wf)
                 except StopIteration:
                     raise StopIteration()  # just fwd
                 except RuntimeError:
                     raise RuntimeError()  # just fwd
                 except:
-                    error("could not reducing data set: " + str(new_data))
+                    error("could not reduce data set: " + str(new_data))
                 i += 1
                 process("CollectSamples | ", i, sample_size)
             # now we use returnDataListNonBlocking on all secondary data providers
