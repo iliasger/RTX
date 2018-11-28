@@ -18,7 +18,7 @@ setup(
         'paho-mqtt',  # mqtt integration
         'requests',  # http integration
         'deap', # evolutionary computation
-        'pathos' # parallel python module
+        'pathos', # parallel python module
         'elasticsearch' # elasticsearch integration
     ]
 )
