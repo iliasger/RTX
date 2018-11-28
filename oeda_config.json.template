@@ -1,0 +1,77 @@
+{
+  "database": {
+    "type": "elasticsearch",
+    "host": "localhost",
+    "port": 9200,
+    "index": {
+      "name": "rtx",
+      "settings" : {
+        "number_of_shards" : 1,
+        "number_of_replicas" : 1
+      }
+    },
+    "rtx_run_type": {
+      "name": "rtx_run",
+      "mapping": {
+        "properties": {
+          "strategy": {
+            "type": "nested",
+            "properties": {
+              "ignore_first_n_results":  { "type": "integer" },
+              "knobs":                   { "type": "object"  },
+              "sample_size":             { "type": "integer" },
+              "type":                    { "type": "keyword" },
+              "exp_count":               { "type": "integer" }
+            }
+          },
+          "created":  { "type": "date"  }
+        }
+      }
+    },
+    "analysis_type": {
+      "name": "analysis",
+      "mapping": {
+        "properties": {
+          "rtx_run_ids":   { "type": "keyword" },
+          "name":          { "type": "keyword" },
+          "result":        { "type": "object"  },
+          "created":       { "type": "date"    }
+        }
+      }
+    },
+    "data_point_type": {
+      "name": "data_point",
+      "mapping": {
+        "_parent":    { "type": "analysis"},
+        "properties": {
+          "exp_run":  { "type": "integer" },
+          "knobs":    { "type": "object"  },
+          "payload":  { "type": "object"  },
+          "created":  { "type": "date"    }
+        }
+      }
+    },
+        "target_system_type": {
+          "name": "target_system",
+          "mapping": {
+            "properties": {
+              "primary_data_provider": {
+                "type": "nested",
+                "properties": {
+                  "type":          { "type": "keyword" },
+                  "serializer":    { "type": "keyword" }
+                }
+              },
+              "change_provider": {
+                "type": "nested",
+                "properties": {
+                  "type":          { "type": "keyword" },
+                  "serializer":    { "type": "keyword" }
+                }
+              },
+              "created":  { "type": "date"  }
+            }
+          }
+        }
+  }
+}

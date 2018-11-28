@@ -14,4 +14,8 @@ dist/
 examples/**/*.png
 examples/**/execution.log
 examples/**/results.csv
-RTX.egg-info/
+.ipynb_checkpoints/*
+RTX.egg-info/*
+oeda_config.json
+results/
+results-CrowdNav/

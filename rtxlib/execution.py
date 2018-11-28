@@ -38,7 +38,7 @@ def experimentFunction(wf, exp):
             new_data = wf.primary_data_provider["instance"].returnData()
             if new_data is not None:
                 i += 1
-                process("IgnoreSamples  | ", i, to_ignore)
+                # process("IgnoreSamples  | ", i, to_ignore)
         print("")
 
     # we store the counter of this experiment in the workflow
@@ -70,7 +70,7 @@ def experimentFunction(wf, exp):
                 except:
                     error("could not reduce data set: " + str(new_data))
                 i += 1
-                process("CollectSamples | ", i, sample_size)
+                # process("CollectSamples | ", i, sample_size)
             # now we use returnDataListNonBlocking on all secondary data providers
             if hasattr(wf, "secondary_data_providers"):
                 for cp in wf.secondary_data_providers:
@@ -98,9 +98,9 @@ def experimentFunction(wf, exp):
     duration = current_milli_time() - start_time
     # do not show stats for forever strategy
     if wf.totalExperiments > 0:
-        info("> Statistics     | " + str(wf.experimentCounter) + "/" + str(wf.totalExperiments)
+        info("> Statistics     | " + str(wf.experimentCounter+1) + "/" + str(wf.totalExperiments)
              + " took " + str(duration) + "ms" + " - remaining ~" + str(
-            (wf.totalExperiments - wf.experimentCounter) * duration / 1000) + "sec")
+            (wf.totalExperiments - wf.experimentCounter+1) * duration / 1000) + "sec")
     info("> FullState      | " + str(exp["state"]))
     info("> ResultValue    | " + str(result))
     # log the result values into a csv file

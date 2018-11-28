@@ -43,7 +43,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 2 and sys.argv[1] == "start":
         wf = loadDefinition(sys.argv[2])
 
-        with open('config.json') as json_data_file:
+        with open('rtx_config.json') as json_data_file:
             try:
                 config_data = json.load(json_data_file)
             except ValueError:
@@ -55,11 +55,11 @@ if __name__ == '__main__':
             database_config = config_data["database"]
             info("> RTX configuration: Using " + database_config["type"] + " database.", Fore.CYAN)
             db = create_instance(database_config)
-            wf.analysis_id = db.save_analysis(wf.analysis, wf.execution_strategy)
+            wf.rtx_run_id = db.save_rtx_run(wf.execution_strategy)
             wf.db = db
         else:
             info("> RTX configuration: No database specified.", Fore.CYAN)
-            wf.analysis_id = "-1"
+            wf.rtx_run_id = "-1"
             wf.db = get_no_database()
 
         # setting global variable log_folder for logging and clear log
