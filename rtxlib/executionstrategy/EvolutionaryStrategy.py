@@ -91,12 +91,15 @@ def evaluate(individual_and_id, vars, ranges, wf):
     fitness = _fitnesses.get(str(individual), None)
 
     if fitness is None:
+        info("> Compute fitness for the individual " + str(individual) + " ...")
         # fitness of the individual is unknown, so compute it and add it to the dict
         # we recreate here the instances of the change provider and data provider that we deleted before
         init_change_provider(wf)
         init_data_providers(wf)
         fitness = evolutionary_execution(wf, individual_and_id, vars)
         _fitnesses[str(individual)] = fitness
+    else:
+        info("> Reuse fitness from earlier evaluation.")
 
     if wf.execution_strategy["is_multi_objective"]:
         # fitness is a tuple (trip overhead, complaints)
