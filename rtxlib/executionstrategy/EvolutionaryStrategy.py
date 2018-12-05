@@ -81,20 +81,31 @@ def mutate(individual, variables, range_tubles):
     return individual,
 
 
-# TODO reuse earlier results if the same individual should be evaluated again
+# reuse earlier fitness results if the same individual should be evaluated again
+# key is the String representation of the individual (sequences cannot be keys), value is the fitness
+_fitnesses = dict()
+
 def evaluate(individual_and_id, vars, ranges, wf):
-    # we recreate here the instances of the change provider and data provider that we deleted before
-    init_change_provider(wf)
-    init_data_providers(wf)
-    result = evolutionary_execution(wf, individual_and_id, vars)
+    individual = individual_and_id[0]
+    # retrieve fitness from dict (earlier evaluation)
+    fitness = _fitnesses.get(str(individual), None)
+
+    if fitness is None:
+        # fitness of the individual is unknown, so compute it and add it to the dict
+        # we recreate here the instances of the change provider and data provider that we deleted before
+        init_change_provider(wf)
+        init_data_providers(wf)
+        fitness = evolutionary_execution(wf, individual_and_id, vars)
+        _fitnesses[str(individual)] = fitness
+
     if wf.execution_strategy["is_multi_objective"]:
-        # result is a tuple (trip overhead, complaints)
-        info("> RESULT: " + str(result), Fore.RED)
-        return result
+        # fitness is a tuple (trip overhead, complaints)
+        info("> FITNESS: " + str(fitness), Fore.RED)
+        return fitness
     else:
         # just return the trip overhead
-        info("> RESULT: " + str(result[0]), Fore.RED)
-        return result[0],
+        info("> FITNESS: " + str(fitness[0]), Fore.RED)
+        return fitness[0],
 
 
 def evolutionary_execution(wf, individual_and_id, variables):
