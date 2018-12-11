@@ -25,6 +25,7 @@ from rtxlib.dataproviders import init_data_providers
 
 def start_evolutionary_strategy(wf):
     global original_primary_data_provider_topic
+    global original_secondary_data_provider_topic
     global original_change_provider_topic
 
     info("> ExecStrategy   | Evolutionary", Fore.CYAN)
@@ -33,6 +34,7 @@ def start_evolutionary_strategy(wf):
     info("> Optimizer      | " + optimizer_method, Fore.CYAN)
 
     original_primary_data_provider_topic = wf.primary_data_provider["instance"].topic
+    original_secondary_data_provider_topic = wf.secondary_data_providers[0]["instance"].topic
     original_change_provider_topic = wf.change_provider["instance"].topic
 
     # we look at the ranges the user has specified in the knobs
@@ -103,7 +105,7 @@ def evaluate(individual_and_id, vars, ranges, wf):
         info("> Reuse fitness from earlier evaluation.")
 
     if wf.execution_strategy["is_multi_objective"]:
-        # fitness is a tuple (trip overhead, complaints)
+        # fitness is a tuple (avg trip overhead, avg performance)
         info("> FITNESS: " + str(fitness), Fore.RED)
         return fitness
     else:
@@ -132,8 +134,10 @@ def evolutionary_execution(wf, individual_and_id, variables):
         suffix = "-" + str(crowdnav_id)
 
     wf.primary_data_provider["instance"].topic = original_primary_data_provider_topic + suffix
+    wf.secondary_data_providers[0]["instance"].topic = original_secondary_data_provider_topic + suffix
     wf.change_provider["instance"].topic = original_change_provider_topic + suffix
     info("Listening to " + wf.primary_data_provider["instance"].topic)
+    info("Listening to " + wf.secondary_data_providers[0]["instance"].topic)
     info("Posting changes to " + wf.change_provider["instance"].topic)
 
     exp["ignore_first_n_results"] = wf.execution_strategy["ignore_first_n_results"]

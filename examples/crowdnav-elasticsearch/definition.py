@@ -27,15 +27,15 @@ execution_strategy = {
 
 primary_data_provider = {
     "type": "kafka_consumer",
-    "kafka_uri": "kafka:9092",
-    "topic": "crowd-nav-trips",
+    "kafka_uri": "localhost:9092",
+    "topic": "crowd-nav-trips-0",
     "serializer": "JSON",
     "data_reducer": primary_data_reducer
 }
 
 change_provider = {
     "type": "kafka_producer",
-    "kafka_uri": "kafka:9092",
+    "kafka_uri": "localhost:9092",
     "topic": "crowd-nav-commands",
     "serializer": "JSON",
 }

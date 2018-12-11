@@ -23,7 +23,7 @@ def nsga2(variables, range_tuples, init_individual, mutate, evaluate, wf):
         crossover_probability) + "\nmutation_probability: " + str(
         mutation_probability))
 
-    creator.create("FitnessMin", base.Fitness, weights=(-1000.0, -1))
+    creator.create("FitnessMin", base.Fitness, weights=(-100.0, -10))
     creator.create("Individual", list, fitness=creator.FitnessMin)
 
     toolbox = base.Toolbox()
@@ -40,6 +40,7 @@ def nsga2(variables, range_tuples, init_individual, mutate, evaluate, wf):
     # we need to delete these entries since they cannot be serialized
     del wf.change_provider["instance"]
     del wf.primary_data_provider["instance"]
+    del wf.secondary_data_providers[0]["instance"]
 
     toolbox.register("evaluate", evaluate, vars=variables, ranges=range_tuples, wf=wf)
 

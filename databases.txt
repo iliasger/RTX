@@ -28,3 +28,5 @@ of your elasticsearch server. You can check this using kibana at http://localhos
 The 21 documents are
    - 20 documents of data points that were collected
    - 1 document of the rtx_run (workflow run) that was performed.
+
+When creating the 'rtx' index in the Kibane interface, select the option "I don't want to use the time filer".
