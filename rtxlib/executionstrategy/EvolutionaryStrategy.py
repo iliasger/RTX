@@ -54,15 +54,15 @@ def start_evolutionary_strategy(wf):
 
 def random_knob_config(variables, range_tuples):
     knob_config = []
-    for x, tuble in zip(variables, range_tuples):
+    for x, range_tuple in zip(variables, range_tuples):
         if x == "route_random_sigma" or x == "exploration_percentage" \
                 or x == "max_speed_and_length_factor" or x == "average_edge_duration_factor":
-            value = random.uniform(tuble[0], tuble[1])
+            value = random.uniform(range_tuple[0], range_tuple[1])
             value = round(value, 2)
             knob_config.append(value)
         elif x == "freshness_update_factor" or x == "freshness_cut_off_value" \
                 or x == "re_route_every_ticks":
-            value = random.randint(tuble[0], tuble[1])
+            value = random.randint(range_tuple[0], range_tuple[1])
             knob_config.append(value)
     return creator.Individual(knob_config)
 
@@ -84,6 +84,7 @@ def mutate(individual, variables, range_tubles):
 # reuse earlier fitness results if the same individual should be evaluated again
 # key is the String representation of the individual (sequences cannot be keys), value is the fitness
 _fitnesses = dict()
+
 
 def evaluate(individual_and_id, vars, ranges, wf):
     individual = individual_and_id[0]
@@ -112,6 +113,12 @@ def evaluate(individual_and_id, vars, ranges, wf):
 
 
 def evolutionary_execution(wf, individual_and_id, variables):
+    # Where do we start multiple threads to call the experimentFunction concurrently,
+    # once for each experiment and crowdnav instance?
+    # This method can be invoked concurrently.
+
+    # TODO should we create new/fresh CrowdNav instances for each iteration/generation?
+    # Otherwise, we use the same instance to evaluate across iterations/generations to evaluate individuals.
 
     opti_values = individual_and_id[0]
     crowdnav_id = individual_and_id[1]
@@ -119,9 +126,6 @@ def evolutionary_execution(wf, individual_and_id, variables):
     knob_object = recreate_knob_from_optimizer_values(variables, opti_values)
     # create a new experiment to run in execution
     exp = dict()
-
-    # TODO where do we start multiple threads to call the experimentFunction concurrently, once for each experiment and crowdnav instance?
-    # TODO should we create new/fresh CrowdNav instances for each iteration/generation? Otherwise, we use the same instance to evaluate across interations/generations to evaluate individiuals.
 
     suffix = ""
     if wf.execution_strategy["parallel_execution_of_individuals"]:
