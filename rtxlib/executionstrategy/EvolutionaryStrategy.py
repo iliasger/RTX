@@ -18,6 +18,7 @@ from deap import base, creator
 
 from ga import ga
 from nsga2 import nsga2
+from novelty_search import novelty_search
 
 from rtxlib.changeproviders import init_change_provider
 from rtxlib.dataproviders import init_data_providers
@@ -52,6 +53,8 @@ def start_evolutionary_strategy(wf):
         ga(variables, range_tuples, random_knob_config, mutate, evaluate, wf)
     elif optimizer_method == "NSGAII":
         nsga2(variables, range_tuples, random_knob_config, mutate, evaluate, wf)
+    elif optimizer_method == "NoveltySearch":
+        novelty_search(variables, range_tuples, random_knob_config, mutate, evaluate, wf)
 
 
 def random_knob_config(variables, range_tuples):
