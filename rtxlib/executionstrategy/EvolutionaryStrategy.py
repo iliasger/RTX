@@ -72,16 +72,16 @@ def random_knob_config(variables, range_tuples):
     return creator.Individual(knob_config)
 
 
-def mutate(individual, variables, range_tubles):
+def mutate(individual, variables, range_tuples):
     i = random.randint(0, len(individual) - 1)
     if variables[i] == "route_random_sigma" or variables[i] == "exploration_percentage" \
             or variables[i] == "max_speed_and_length_factor" or variables[i] == "average_edge_duration_factor":
-        value = random.uniform(range_tubles[i][0], range_tubles[i][1])
+        value = random.uniform(range_tuples[i][0], range_tuples[i][1])
         value = round(value, 2)
         individual[i] = value
     elif variables[i] == "freshness_update_factor" or variables[i] == "freshness_cut_off_value" \
             or variables[i] == "re_route_every_ticks":
-        value = random.randint(range_tubles[i][0], range_tubles[i][1])
+        value = random.randint(range_tuples[i][0], range_tuples[i][1])
         individual[i] = value
     return individual,
 
