@@ -40,7 +40,7 @@ def novelty_search(variables, range_tuples, init_individual, mutate, evaluate, w
          "\nnovelty_archive_perc: "              + str(novelty_archive_perc)  + \
          "\nnovelty_archive_k: "                 + str(novelty_archive_k))
 
-    creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+    creator.create("FitnessMin", base.Fitness, weights=(-100.0, -10))
     creator.create("Individual", list, fitness=creator.FitnessMin)
 
     toolbox = base.Toolbox()
@@ -53,7 +53,7 @@ def novelty_search(variables, range_tuples, init_individual, mutate, evaluate, w
     info("Population: " + str(pop))
 
     toolbox.register("mate", tools.cxOnePoint)
-    toolbox.register("mutate", mutate, variables=variables, range_tubles=range_tuples)
+    toolbox.register("mutate", mutate, variables=variables, range_tuples=range_tuples)
     toolbox.register("select", tools.selTournament, tournsize=3)
 
     # we need to delete these entries since they cannot be serialized
@@ -109,6 +109,7 @@ def novelty_search(variables, range_tuples, init_individual, mutate, evaluate, w
             ind.fitness.values = fit
 
 
+
         # TODO - do we need to overwrite fitness?
         novelty_archive = calculate_novelty(g, pop, novelty_archive_k, novelty_archive)
 
@@ -149,6 +150,9 @@ def calculate_novelty(generation, population, k, novelty_archive):
       if i is not j:
         novelties_sum += novelties[i][j]
     novelty_scores[i] = novelties_sum / float(len(population))
+
+    # TODO: add weights to definition.py
+    novelty_scores[i] = (0.75 * novelty_scores[i]) + (0.25 * population[i].fitness.values[0])
 
     # Sort scores in descending order
     sorted_scores = sorted(novelty_scores.items(), key=lambda x: -x[1])
