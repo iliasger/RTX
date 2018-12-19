@@ -9,11 +9,12 @@ execution_strategy = {
     "ignore_first_n_results": 5,  #10000,
     "sample_size": 10,  #10000,
     "type": "evolutionary",
-    "optimizer_method": "NSGAII",  # "GA"  "NoveltySearch"
+    # Options: NSGAII, GA, NoveltySearch, RandomSearch
+    "optimizer_method": "RandomSearch",  # "GA"  "NoveltySearch"
     "is_multi_objective": True,
-    "optimizer_iterations": 10,  # number of generations
-    "population_size": 5,  # number of individuals in the population
-    "offspring_size": 5,  # typically equals the population size
+    "optimizer_iterations": 1,  # number of generations
+    "population_size": 5,      # number of individuals in the population
+    "offspring_size": 5,        # typically equals the population size
     "crossover_probability": 0.7,
     "mutation_probability": 0.3,
     "novelty_archive_percent": 0.2,
