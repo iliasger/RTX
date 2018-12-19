@@ -154,6 +154,9 @@ def calculate_novelty(generation, population, k, novelty_archive):
     # TODO: add weights to definition.py
     novelty_scores[i] = (0.75 * novelty_scores[i]) + (0.25 * population[i].fitness.values[0])
 
+    # Override DEAP fitness with novelty metric
+    population[i].fitness.values[0] = novelty_scores[i]
+
     # Sort scores in descending order
     sorted_scores = sorted(novelty_scores.items(), key=lambda x: -x[1])
 
