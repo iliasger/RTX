@@ -95,7 +95,9 @@ def nsga2(variables, range_tuples, init_individual, mutate, evaluate, wf):
         info(logbook.stream)
 
     # for each iteration/generation
-    for gen in range(1, optimizer_iterations + 1):
+    # The generation and evaluation of the initial population is already the first iteration.
+    # So, we start the for loop with 1 ranging until the number of iterations.
+    for gen in range(1, optimizer_iterations):
         if debug:
             info("\n" + str(gen) + ". Generation")
             info("Population    : " + str(population))
@@ -145,6 +147,8 @@ def nsga2(variables, range_tuples, init_individual, mutate, evaluate, wf):
     info("\nDONE\n")
     info("Population: " + str(population))
     info("Hall of Fame: " + str(hall_of_fame))
+    for hof_ind in hall_of_fame:
+        info(str(hof_ind) + " has fitness " + str(hof_ind.fitness))
 
 
 def vary(population, toolbox, lambda_, cxpb, mutpb):
