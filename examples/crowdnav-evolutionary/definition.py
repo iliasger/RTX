@@ -32,16 +32,18 @@ execution_strategy = {
 
 
 def overhead_data_reducer(state, new_data, wf):
+    state["overheads"].append(new_data["overhead"])
     cnt = state["count_overhead"]
-    wf.db.save_data_point(wf.experimentCounter, wf.current_knobs, new_data, state["count_overhead"], wf.rtx_run_id, "overhead", wf.processor_id)
+    # wf.db.save_data_point(wf.experimentCounter, wf.current_knobs, new_data, state["count_routing"], wf.rtx_run_id, "routing", wf.processor_id)
     state["avg_overhead"] = (state["avg_overhead"] * cnt + new_data["overhead"]) / (cnt + 1)
     state["count_overhead"] = cnt + 1
     return state
 
 
 def routing_performance_data_reducer(state, new_data, wf):
+    state["routings"].append(new_data["duration"])
     cnt = state["count_routing"]
-    wf.db.save_data_point(wf.experimentCounter, wf.current_knobs, new_data, state["count_routing"], wf.rtx_run_id, "routing", wf.processor_id)
+    # wf.db.save_data_point(wf.experimentCounter, wf.current_knobs, new_data, state["count_routing"], wf.rtx_run_id, "routing", wf.processor_id)
     state["avg_routing"] = (state["avg_routing"] * cnt + new_data["duration"]) / (cnt + 1)
     state["count_routing"] = cnt + 1
     return state
@@ -74,12 +76,18 @@ change_provider = {
 
 
 def evaluator(result_state, wf):
+    data_to_save = {}
+    data_to_save["overheads"] = result_state["overheads"]
+    data_to_save["routings"] = result_state["routings"]
+    wf.db.save_data_for_experiment(wf.experimentCounter, wf.current_knobs, data_to_save, wf.rtx_run_id, wf.processor_id)
     # Here, we need to decide either to return a single value or a tuple
     # depending of course on what the optimizer can handle
     return result_state["avg_overhead"], result_state["avg_routing"]
 
 
 def state_initializer(state, wf):
+    state["overheads"] = []
+    state["routings"] = []
     state["count_routing"] = 0
     state["count_overhead"] = 0
     state["avg_overhead"] = 0

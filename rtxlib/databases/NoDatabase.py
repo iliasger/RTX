@@ -25,6 +25,9 @@ class NoDatabase(Database):
     def save_data_point(self, exp_run, knobs, payload, data_point_id, rtx_run_id, output, processor_id):
         error("Cannot save data point. Please specify a database configuration in config.json")
 
+    def save_data_for_experiment(self, exp_run, knobs, payload, rtx_run_id, processor_id=0):
+        error("Cannot save data for experiment. Please specify a database configuration in config.json")
+
     def get_data_points(self, rtx_run_id, exp_run):
         error("Cannot get data point. Please specify a database configuration in config.json")
 

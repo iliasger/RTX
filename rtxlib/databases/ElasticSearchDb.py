@@ -124,6 +124,21 @@ class ElasticSearchDb(Database):
         except ConnectionError:
             error("Error while saving data point data in elasticsearch. Check connection to elasticsearch.")
 
+
+    def save_data_for_experiment(self, exp_run, knobs, payload, rtx_run_id, processor_id=0):
+        data_point_id = rtx_run_id + "#It_" + str(exp_run) + "#Ind_" + str(processor_id)
+        body = dict()
+        body["iteration"] = exp_run
+        body["individual"] = processor_id
+        body["knobs"] = knobs
+        body["payload"] = payload
+        body["created"] = datetime.now()
+        try:
+            self.es.index(self.index, self.data_point_type_name, body, data_point_id, parent=rtx_run_id)
+        except ConnectionError:
+            error("Error while saving data point data in elasticsearch. Check connection to elasticsearch.")
+
+
     def get_data_points(self, rtx_run_id, exp_run):
         query = {
             "query": {
@@ -155,10 +170,30 @@ class ElasticSearchDb(Database):
 
     def get_all_data_points(self):
         self.indices_client.refresh()
-        results = []
+
+        rtx_runs = list()
+        data = list()
+
+        for doc in scan(self.es,
+                        query={"query": {"match_all": {}}},
+                        index=self.index,
+                        doc_type=self.rtx_run_type_name):
+            res = dict()
+            res["id"] = doc["_id"]
+            res["strategy"] = doc["_source"]["strategy"]
+            res["time"] = doc["_source"]["created"]
+            rtx_runs.append(res)
+
         for doc in scan(self.es,
                         query={"query": {"match_all": {}}},
                         index=self.index,
                         doc_type=self.data_point_type_name):
-            results.append(doc)
-        return [(res["_source"]["payload"], res["_source"]["knobs"]) for res in results]
+            res = dict()
+            res["parent"] = doc["_parent"]
+            res["payload"] = doc["_source"]["payload"]
+            res["knobs"] = doc["_source"]["knobs"]
+            res["iteration"] = doc["_source"]["iteration"]
+            res["individual"] = doc["_source"]["individual"]
+            data.append(res)
+
+        return rtx_runs, data

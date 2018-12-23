@@ -19,3 +19,4 @@ RTX.egg-info/*
 oeda_config.json
 results/
 results-CrowdNav/
+/raw_data/*.pickle

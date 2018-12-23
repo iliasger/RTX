@@ -32,6 +32,10 @@ class Database:
         """ called for saving experiment configuration runs and raw data """
         pass
 
+    def save_data_for_experiment(self, exp_run, knobs, payload, rtx_run_id, processor_id=0):
+        """ called for saving all data collected in an experiment in a batch"""
+        pass
+
     def get_data_points(self, rtx_run_id, exp_run):
         """ called for getting all the data points corresponding to an analytis run """
         pass
