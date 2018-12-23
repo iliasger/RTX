@@ -33,7 +33,7 @@ def nsga2(variables, range_tuples, init_individual, mutate, evaluate, wf):
 
     toolbox.register("mate", tools.cxUniform, indpb=0.5)
 
-    toolbox.register("mutate", mutate, variables=variables, range_tubles=range_tuples)
+    toolbox.register("mutate", mutate, variables=variables, range_tuples=range_tuples)
 
     toolbox.register("select", tools.selNSGA2)
 
