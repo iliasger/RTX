@@ -1,5 +1,6 @@
 # Evolutionary search for knob values
 name = "CrowdNav-Evolutionary"
+processor_id = 0
 
 execution_strategy = {
     "parallel_execution_of_individuals": True, # if this is True, CrowdNav should be run with 'python parallel.py <no>'
@@ -32,19 +33,17 @@ execution_strategy = {
 
 def overhead_data_reducer(state, new_data, wf):
     cnt = state["count_overhead"]
-    # TODO check how the data is saved from multiple data reducers esp. the secondary ones
-    wf.db.save_data_point(wf.experimentCounter, wf.current_knobs, new_data, state["count_overhead"], wf.rtx_run_id)
+    wf.db.save_data_point(wf.experimentCounter, wf.current_knobs, new_data, state["count_overhead"], wf.rtx_run_id, "overhead", wf.processor_id)
     state["avg_overhead"] = (state["avg_overhead"] * cnt + new_data["overhead"]) / (cnt + 1)
     state["count_overhead"] = cnt + 1
     return state
 
 
-def performance_data_reducer(state, new_data, wf):
-    cnt = state["count_performance"]
-    # TODO check how the data is saved from multiple data reducers esp. the secondary ones
-    wf.db.save_data_point(wf.experimentCounter, wf.current_knobs, new_data, state["count_performance"], wf.rtx_run_id)
-    state["avg_performance"] = (state["avg_performance"] * cnt + new_data["duration"]) / (cnt + 1)
-    state["count_performance"] = cnt + 1
+def routing_performance_data_reducer(state, new_data, wf):
+    cnt = state["count_routing"]
+    wf.db.save_data_point(wf.experimentCounter, wf.current_knobs, new_data, state["count_routing"], wf.rtx_run_id, "routing", wf.processor_id)
+    state["avg_routing"] = (state["avg_routing"] * cnt + new_data["duration"]) / (cnt + 1)
+    state["count_routing"] = cnt + 1
     return state
 
 
@@ -60,9 +59,9 @@ secondary_data_providers = [
     {
         "type": "kafka_consumer",
         "kafka_uri": "localhost:9092",
-        "topic": "crowd-nav-performance",
+        "topic": "crowd-nav-routing",
         "serializer": "JSON",
-        "data_reducer": performance_data_reducer
+        "data_reducer": routing_performance_data_reducer
     }
 ]
 
@@ -77,12 +76,12 @@ change_provider = {
 def evaluator(result_state, wf):
     # Here, we need to decide either to return a single value or a tuple
     # depending of course on what the optimizer can handle
-    return result_state["avg_overhead"], result_state["avg_performance"]
+    return result_state["avg_overhead"], result_state["avg_routing"]
 
 
 def state_initializer(state, wf):
-    state["count_performance"] = 0
+    state["count_routing"] = 0
     state["count_overhead"] = 0
     state["avg_overhead"] = 0
-    state["avg_performance"] = 0
+    state["avg_routing"] = 0
     return state

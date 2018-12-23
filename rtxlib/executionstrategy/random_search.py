@@ -27,7 +27,7 @@ def random_search(variables, range_tuples, init_individual, mutate, evaluate, wf
     population_size       = wf.execution_strategy["population_size"] * optimizer_iterations # No evolution, just run all
 
     info("> Parameters:\noptimizer_iterations: " + str(optimizer_iterations)  + \
-         "\npopulation_size:  "                  + str(population_size)) 
+         "\npopulation_size:  "                  + str(population_size))
 
     #creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
     creator.create("FitnessMin", base.Fitness, weights=(-100.0, -10))
@@ -49,19 +49,22 @@ def random_search(variables, range_tuples, init_individual, mutate, evaluate, wf
 
     toolbox.register("evaluate", evaluate, vars=variables, ranges=range_tuples, wf=wf)
 
-    # Evaluate the entire population
-    number_individuals_to_evaluate_in_parallel = wf.execution_strategy["population_size"]
-    pool = pathos.multiprocessing.ProcessPool(number_individuals_to_evaluate_in_parallel)
-    zipped = zip(pop, range(number_individuals_to_evaluate_in_parallel))
-    if wf.execution_strategy["parallel_execution_of_individuals"]:
-        fitnesses = pool.map(toolbox.evaluate, zipped)
-    else:
-        fitnesses = map(toolbox.evaluate, zipped)
+    # Evaluate the entire population, in batches
+    number_individuals_to_evaluate_in_batch = wf.execution_strategy["population_size"]
+    pool = pathos.multiprocessing.ProcessPool(number_individuals_to_evaluate_in_batch)
+    for gen in range(optimizer_iterations):
+        gen_index = gen * number_individuals_to_evaluate_in_batch
+        # select only the relevant batch from the whole population to evaluate
+        batch = pop[gen_index:gen_index+number_individuals_to_evaluate_in_batch]
+        zipped = zip(batch, range(number_individuals_to_evaluate_in_batch))
+        if wf.execution_strategy["parallel_execution_of_individuals"]:
+            fitnesses = pool.map(toolbox.evaluate, zipped)
+        else:
+            fitnesses = map(toolbox.evaluate, zipped)
 
-    for ind, fit in zip(pop, fitnesses):
-        info("> " + str(ind) + " -- " + str(fit))
-        ind.fitness.values = fit
-
+        for ind, fit in zip(batch, fitnesses):
+            info("> " + str(ind) + " -- " + str(fit))
+            ind.fitness.values = fit
 
     # The population is entirely replaced by the offspring
     info("> Population: " + str(pop))

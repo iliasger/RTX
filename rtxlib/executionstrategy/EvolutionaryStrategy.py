@@ -35,9 +35,9 @@ def start_evolutionary_strategy(wf):
     wf.totalExperiments = wf.execution_strategy["optimizer_iterations"]
     info("> Optimizer      | " + optimizer_method, Fore.CYAN)
 
-    original_primary_data_provider_topic = wf.primary_data_provider["instance"].topic
-    original_secondary_data_provider_topic = wf.secondary_data_providers[0]["instance"].topic
-    original_change_provider_topic = wf.change_provider["instance"].topic
+    original_primary_data_provider_topic = wf.primary_data_provider["topic"]
+    original_secondary_data_provider_topic = wf.secondary_data_providers[0]["topic"]
+    original_change_provider_topic = wf.change_provider["topic"]
 
     # we look at the ranges the user has specified in the knobs
     knobs = wf.execution_strategy["knobs"]
@@ -103,9 +103,10 @@ def evaluate(individual_and_id, vars, ranges, wf):
         info("> Compute fitness for the individual " + str(individual) + " ...")
         # fitness of the individual is unknown, so compute it and add it to the dict
         # we recreate here the instances of the change provider and data provider that we deleted before
+        update_topics(wf, individual_and_id[1])
         init_change_provider(wf)
         init_data_providers(wf)
-        fitness = evolutionary_execution(wf, individual_and_id, vars)
+        fitness = evolutionary_execution(wf, individual_and_id[0], vars)
         _fitnesses[str(individual)] = fitness
     else:
         info("> Reuse fitness from earlier evaluation.")
@@ -120,7 +121,7 @@ def evaluate(individual_and_id, vars, ranges, wf):
         return fitness[0],
 
 
-def evolutionary_execution(wf, individual_and_id, variables):
+def evolutionary_execution(wf, opti_values, variables):
     # Where do we start multiple threads to call the experimentFunction concurrently,
     # once for each experiment and crowdnav instance?
     # This method can be invoked concurrently.
@@ -128,29 +129,32 @@ def evolutionary_execution(wf, individual_and_id, variables):
     # TODO should we create new/fresh CrowdNav instances for each iteration/generation?
     # Otherwise, we use the same instance to evaluate across iterations/generations to evaluate individuals.
 
-    opti_values = individual_and_id[0]
-    crowdnav_id = individual_and_id[1]
     """ this is the function we call and that returns a value for optimization """
     knob_object = recreate_knob_from_optimizer_values(variables, opti_values)
     # create a new experiment to run in execution
     exp = dict()
-
-    suffix = ""
-    if wf.execution_strategy["parallel_execution_of_individuals"]:
-        suffix = "-" + str(crowdnav_id)
-
-    wf.primary_data_provider["instance"].topic = original_primary_data_provider_topic + suffix
-    wf.secondary_data_providers[0]["instance"].topic = original_secondary_data_provider_topic + suffix
-    wf.change_provider["instance"].topic = original_change_provider_topic + suffix
-    info("Listening to " + wf.primary_data_provider["instance"].topic)
-    info("Listening to " + wf.secondary_data_providers[0]["instance"].topic)
-    info("Posting changes to " + wf.change_provider["instance"].topic)
-
     exp["ignore_first_n_results"] = wf.execution_strategy["ignore_first_n_results"]
     exp["sample_size"] = wf.execution_strategy["sample_size"]
     exp["knobs"] = knob_object
     # the experiment function returns what the evaluator in definition.py is computing
     return experimentFunction(wf, exp)
+
+
+def update_topics(wf, crowdnav_id):
+
+    if wf.execution_strategy["parallel_execution_of_individuals"]:
+        suffix = "-" + str(crowdnav_id)
+        wf.processor_id = crowdnav_id
+    else:
+        suffix = "-0"
+
+    wf.primary_data_provider["topic"] = original_primary_data_provider_topic + suffix
+    wf.secondary_data_providers[0]["topic"] = original_secondary_data_provider_topic + suffix
+    wf.change_provider["topic"] = original_change_provider_topic + suffix
+
+    info("Listening to " + wf.primary_data_provider["topic"])
+    info("Listening to " + wf.secondary_data_providers[0]["topic"])
+    info("Posting changes to " + wf.change_provider["topic"])
 
 
 def recreate_knob_from_optimizer_values(variables, opti_values):

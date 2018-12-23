@@ -45,7 +45,7 @@ primary_data_provider = {
 secondary_data_providers = [
     {
         "type": "kafka_consumer",
-        "kafka_uri": "kafka:9092",
+        "kafka_uri": "localhost:9092",
         "topic": "crowd-nav-routing-0",
         "serializer": "JSON",
         "data_reducer": routing_data_reducer

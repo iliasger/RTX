@@ -28,7 +28,7 @@ class Database:
         """ returns the experiment count parameter of the rtx run specified by its id """
         pass
 
-    def save_data_point(self, exp_run, knobs, payload, data_point_id, rtx_run_id, type):
+    def save_data_point(self, exp_run, knobs, payload, data_point_id, rtx_run_id, output, processor_id):
         """ called for saving experiment configuration runs and raw data """
         pass
 

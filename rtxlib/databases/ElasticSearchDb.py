@@ -112,8 +112,8 @@ class ElasticSearchDb(Database):
             return 0
         return res["_source"]["strategy"]["exp_count"]
 
-    def save_data_point(self, exp_run, knobs, payload, data_point_count, rtx_run_id, type):
-        data_point_id = rtx_run_id + "#E" + str(exp_run) + "_" + type + "_" + str(data_point_count)
+    def save_data_point(self, exp_run, knobs, payload, data_point_count, rtx_run_id, output, processor_id=0):
+        data_point_id = rtx_run_id + "#It_" + str(exp_run) + "#Ind_" + str(processor_id) + "#No_" + str(data_point_count) + "#out_" + output
         body = dict()
         body["exp_run"] = exp_run
         body["knobs"] = knobs
