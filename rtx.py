@@ -4,6 +4,7 @@ import imp
 import json
 import rtxlib
 import os
+import random
 
 from colorama import Fore
 from rtxlib import info, error, debug
