@@ -18,7 +18,9 @@ execution_strategy = {
     "offspring_size": 5,        # typically equals the population size
     "crossover_probability": 0.7,
     "mutation_probability": 0.3,
-    "novelty_archive_percent": 0.2,
+    "novelty_archive_percent": 0.2, # % of population to keep in the archive
+    "fitness_weight":0.25,          # linear weighted sum for novelty metric
+    "novelty_weight":0.75,          # linear weighted sum for novelty metric
     "knobs": {
         "route_random_sigma": (0.0, 0.3),
         "exploration_percentage": (0.0, 0.3),

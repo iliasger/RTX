@@ -15,7 +15,7 @@ from rtxlib.databases import get_no_database
 
 def loadDefinition(folder):
     """ opens the given folder and searches for a definition.py file and checks if it looks valid"""
-    if len(sys.argv) != 3:
+    if (len(sys.argv) != 3) and (len(sys.argv) != 4):
         error("missing experiment folder")
         exit(1)
     try:
@@ -35,7 +35,18 @@ def loadDefinition(folder):
 
 
 if __name__ == '__main__':
+    # Arg 1: start
+    # Arg 2: location
+    # Arg 3: seed
     if len(sys.argv) > 2 and sys.argv[1] == "start":
+        # Handle seed if available
+        if len(sys.argv) > 3:
+          print "Seed value: %d" % int(sys.argv[3])
+          random.seed(int(sys.argv[3]))
+        else:
+          print "Random seed"
+          random.seed()
+
         wf = loadDefinition(sys.argv[2])
 
         if os.path.isfile('oeda_config.json'):
@@ -77,9 +88,9 @@ if __name__ == '__main__':
     # Help
     info("RTX Help Page")
     info("COMMANDS:")
-    info("> python rtx.py help           -> shows this page ")
-    info("         rtx.py start  $folder -> runs the experiment in this folder")
-    info("         rtx.py report $folder -> shows the reports for the experiment in this folder")
+    info("> python rtx.py help                   -> shows this page ")
+    info("         rtx.py start  $folder [$seed] -> runs the experiment in this folder, seed optional")
+    info("         rtx.py report $folder         -> shows the reports for the experiment in this folder")
     info("EXAMPLE:")
     info("> python rtx.py start ./examples/http-gauss")
     exit(0)

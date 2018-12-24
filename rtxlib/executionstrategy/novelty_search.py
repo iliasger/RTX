@@ -21,10 +21,15 @@ def novelty_search(variables, range_tuples, init_individual, mutate, evaluate, w
 
     random.seed()
 
-    optimizer_iterations = wf.execution_strategy["optimizer_iterations"]
-    population_size = wf.execution_strategy["population_size"]
+    optimizer_iterations  = wf.execution_strategy["optimizer_iterations"]
+    population_size       = wf.execution_strategy["population_size"]
     crossover_probability = wf.execution_strategy["crossover_probability"]
-    mutation_probability = wf.execution_strategy["mutation_probability"]
+    mutation_probability  = wf.execution_strategy["mutation_probability"]
+
+    fitness_weight        = wf.execution_strategy["fitness_weight"]
+    novelty_weight        = wf.execution_strategy["novelty_weight"]
+
+
 
     # Novelty parameters
     novelty_archive_perc = wf.execution_strategy["novelty_archive_percent"]
@@ -77,7 +82,7 @@ def novelty_search(variables, range_tuples, init_individual, mutate, evaluate, w
         ind.fitness.values = fit
 
     # Calculate initial novelty archive
-    novelty_archive = calculate_novelty(0, pop, novelty_archive_k, novelty_archive)
+    novelty_archive = calculate_novelty(0, pop, novelty_archive_k, novelty_archive, novelty_weight, fitness_weight)
 
     for g in range(optimizer_iterations):
         info("> \n" + str(g) + ". Generation")
@@ -111,7 +116,7 @@ def novelty_search(variables, range_tuples, init_individual, mutate, evaluate, w
 
 
         # TODO - do we need to overwrite fitness?
-        novelty_archive = calculate_novelty(g, pop, novelty_archive_k, novelty_archive)
+        novelty_archive = calculate_novelty(g, pop, novelty_archive_k, novelty_archive, novelty_weight, fitness_weight)
 
         # The population is entirely replaced by the offspring
         pop[:] = offspring
@@ -130,7 +135,7 @@ def novelty_search(variables, range_tuples, init_individual, mutate, evaluate, w
  
 # Calculate pairwise novelty score between individuals in population,
 # as well as to individuals in novelty archive
-def calculate_novelty(generation, population, k, novelty_archive):
+def calculate_novelty(generation, population, k, novelty_archive, novelty_weight, fitness_weight):
   novelties      = defaultdict(dict)
   novelty_scores = {}
 
@@ -152,7 +157,7 @@ def calculate_novelty(generation, population, k, novelty_archive):
     novelty_scores[i] = novelties_sum / float(len(population))
 
     # TODO: add weights to definition.py
-    novelty_scores[i] = (0.75 * novelty_scores[i]) + (0.25 * population[i].fitness.values[0])
+    novelty_scores[i] = (novelty_weight * novelty_scores[i]) + (fitness_weight * population[i].fitness.values[0])
 
     # Override DEAP fitness with novelty metric
     new_tuple = (novelty_scores[i], population[i].fitness.values[1])
