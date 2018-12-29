@@ -109,7 +109,7 @@ def evaluate(individual_and_id, vars, ranges, wf):
         fitness = evolutionary_execution(wf, individual_and_id[0], vars)
         _fitnesses[str(individual)] = fitness
     else:
-        info("> Reuse fitness from earlier evaluation.")
+        info("> Reuse fitness from earlier evaluation for the individual " + str(individual) + " ...")
 
     if wf.execution_strategy["is_multi_objective"]:
         # fitness is a tuple (avg trip overhead, avg performance)
