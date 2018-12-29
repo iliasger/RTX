@@ -3,6 +3,7 @@ from rtxlib.executionstrategy.StepStrategy import start_step_strategy
 from rtxlib.executionstrategy.SelfOptimizerStrategy import start_self_optimizer_strategy
 from rtxlib.executionstrategy.SequencialStrategy import start_sequential_strategy
 from rtxlib.executionstrategy.EvolutionaryStrategy import start_evolutionary_strategy
+from rtxlib.executionstrategy.MlrStrategy import start_mlr_mbo_strategy
 
 from rtxlib import log_results, error, info
 
@@ -21,6 +22,10 @@ def run_execution_strategy(wf):
         elif wf.execution_strategy["type"] == "evolutionary":
             log_results(wf.folder, wf.execution_strategy["knobs"].keys() + ["result"], append=False)
             start_evolutionary_strategy(wf)
+
+        elif wf.execution_strategy["type"] == 'mlr_mbo':
+            log_results(wf.folder, wf.execution_strategy["knobs"].keys() + ["result"], append=False)
+            start_mlr_mbo_strategy(wf)
 
         elif wf.execution_strategy["type"] == "self_optimizer":
             log_results(wf.folder, wf.execution_strategy["knobs"].keys() + ["result"], append=False)
