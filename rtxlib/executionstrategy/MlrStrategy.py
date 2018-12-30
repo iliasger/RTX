@@ -21,7 +21,14 @@ def start_mlr_mbo_strategy(wf):
     optimizer_iterations = wf.execution_strategy["optimizer_iterations"]
     optimizer_iterations_in_design = wf.execution_strategy["optimizer_iterations_in_design"]
     wf.totalExperiments = optimizer_iterations + optimizer_iterations_in_design # also include number of samples in design to it
-    acquisition_method = wf.execution_strategy["acquisition_method"]
+    if "acquisition_method" in wf.execution_strategy:
+        acquisition_method = wf.execution_strategy["acquisition_method"]
+    else:
+        acquisition_method = "dib"
+    if "objectives_number" in wf.execution_strategy:
+        objectives_number = wf.execution_strategy["objectives_number"]
+    else:
+        objectives_number = 1
 
     # we look at the ranges the user has specified in the knobs
     knobs = wf.execution_strategy["knobs"]
@@ -43,10 +50,11 @@ def start_mlr_mbo_strategy(wf):
             acquisition_method=acquisition_method,
             optimizer_iterations=optimizer_iterations,
             optimizer_iterations_in_design=optimizer_iterations_in_design,
-            knobs=json_array
+            knobs=json_array,
+            objectives_number=objectives_number
         )
     )
-    result = initiate_mlr_mbo(wf, request_body)
+    result = initiate_mlr_mbo(wf, request_body, objectives_number)
     if result is not None:
         info("> ExecStrategy mlrMBO  | " + str(result), Fore.CYAN)
     else:
@@ -66,7 +74,7 @@ def start_mlr_mbo_strategy(wf):
         ]
     ]
 '''
-def initiate_mlr_mbo(wf, request_body):
+def initiate_mlr_mbo(wf, request_body, objectives_number):
     try:
         api = host_with_port + "/mlrMBO/initiate"
         r = requests.post(api, data=json.dumps(request_body), headers=header)
@@ -76,12 +84,13 @@ def initiate_mlr_mbo(wf, request_body):
             initial_design_values = []
             for knob in initial_design_knobs:
                 exp = create_experiment_tuple(wf, knob)
-               # wf.setup_stage(wf, exp["knobs"])
-                value = float(experimentFunction(wf, exp))
-                # value = random.uniform(1, 4)
+                if objectives_number == 1:
+                    value = float(experimentFunction(wf, exp))
+                else:
+                    value = experimentFunction(wf, exp)
                 initial_design_values.append(value)
             # now update the design with calculated outputs
-            return update_initial_design(wf, initial_design_values)
+            return update_initial_design(wf, initial_design_values, objectives_number)
         else:
             err_msg = {"error": "Cannot fetch initial design proposal/values, make sure R server is up and running"}
             error(err_msg)
@@ -92,7 +101,7 @@ def initiate_mlr_mbo(wf, request_body):
 
 
 ''' updates mlrMBO design by sending outputs in a HTTP POST request '''
-def update_initial_design(wf, initial_design_values):
+def update_initial_design(wf, initial_design_values, objectives_number):
     try:
         body = dict(
             id=wf.id,
@@ -104,7 +113,7 @@ def update_initial_design(wf, initial_design_values):
         if "result" in res:
             if res["result"] is True:
                 # if it reaches this point, then initial state is done, we should create artifacts
-                return create_artifacts(wf)
+                return create_artifacts(wf, objectives_number)
             else:
                 err_msg = {"error": res["result"]}
                 error(err_msg)
@@ -119,7 +128,7 @@ def update_initial_design(wf, initial_design_values):
 
 
 ''' triggers R side to create acquisition criteria & MBO controll and calls initSMBO function '''
-def create_artifacts(wf):
+def create_artifacts(wf, objectives_number):
     try:
         # keeps track of all knobs that have been used in experimentation and find best one
         knobs_and_results = []
@@ -143,8 +152,10 @@ def create_artifacts(wf):
                         proposed_points = get_proposed_points(wf)
                         if proposed_points:
                             exp = create_experiment_tuple(wf, proposed_points)
-                       #     wf.setup_stage(wf, exp["knobs"])
-                            result = float(experimentFunction(wf, exp))
+                            if objectives_number == 1:
+                                result = float(experimentFunction(wf, exp))
+                            else:
+                                result = experimentFunction(wf, exp)
                             knobs_and_results.append((exp["knobs"], result))
                             successful_update = update_mbo_state(wf, proposed_points, result)
                         else:

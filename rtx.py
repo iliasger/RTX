@@ -78,7 +78,7 @@ if __name__ == '__main__':
         info("> Starting RTX experiment...")
 
         execute_workflow(wf)
-        plot(wf)
+        # plot(wf)
         exit(0)
     if len(sys.argv) > 2 and sys.argv[1] == "report":
         wf = loadDefinition(sys.argv[2])
