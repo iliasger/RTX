@@ -26,7 +26,9 @@ def experimentFunction(wf, exp):
 
     # apply changes to system
     try:
-        wf.change_provider["instance"].applyChange(change_creator(exp["knobs"],wf))
+        change_creator(exp["knobs"],wf)
+        # we are restarting CrowdNav with a configuration, so this is not needed any more
+        # wf.change_provider["instance"].applyChange(change_creator(exp["knobs"],wf))
     except:
         error("apply changes did not work")
 

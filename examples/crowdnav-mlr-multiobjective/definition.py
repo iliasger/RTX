@@ -1,13 +1,18 @@
+import multiprocessing as mpc
+from time import sleep
+from app import Boot
+
+# first run 'Rscript start_R_server.R' in https://github.com/alinaciuysal/mlrMBO-API
 name = "MLR-MBO bayesian optimization - multiobjective"
 id = 1
 
 execution_strategy = {
-    "ignore_first_n_results": 3,
+    "ignore_first_n_results": 0,
     "sample_size": 10,
     "type": "mlr_mbo",
-    "optimizer_iterations": 5,
+    "optimizer_iterations": 2,
     "optimizer_iterations_in_design": 3,
-    "population_size": 5,
+    "population_size": 3,
     "objectives_number": 2,
     "knobs": {
         "route_random_sigma": (0.0, 1.0)
@@ -54,9 +59,20 @@ change_provider = {
 }
 
 
+def change_event_creator(variables, wf):
+    p1 = mpc.Process(target=Boot.start, args=(wf.process_id, True, False, wf.seed, variables, wf.car_count))
+    p1.daemon = True
+    p1.start()
+    sleep(10)
+
+    return variables
+
+
 def evaluator(result_state, wf):
+
+    wf.change_provider["instance"].applyChange({"terminate": True})
+
     return result_state["avg_overhead"], result_state["avg_performance"]
-    # return result_state["avg_overhead"]
 
 
 def state_initializer(state, wf):

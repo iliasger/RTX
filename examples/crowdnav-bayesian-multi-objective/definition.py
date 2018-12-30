@@ -1,7 +1,12 @@
+import multiprocessing as mpc
+from time import sleep
+from app import Boot
+
 name = "CrowdNav-Bayesian-2objectives"
+# DEPRECATED: USE crowndnav-mlr-multiobjective instead for multi-objective optimization
 
 execution_strategy = {
-    "ignore_first_n_results": 10,
+    "ignore_first_n_results": 0,
     "sample_size": 10,
     "type": "self_optimizer",
     "optimizer_method": "gauss",
@@ -45,7 +50,7 @@ secondary_data_providers = [
     {
         "type": "kafka_consumer",
         "kafka_uri": "kafka:9092",
-        "topic": "crowd-nav-performance",
+        "topic": "crowd-nav-routing-0",
         "serializer": "JSON",
         "data_reducer": performance_data_reducer
     }
@@ -59,9 +64,19 @@ change_provider = {
 }
 
 
+def change_event_creator(variables, wf):
+    p1 = mpc.Process(target=Boot.start, args=(wf.process_id, True, False, wf.seed, variables, wf.car_count))
+    p1.daemon = True
+    p1.start()
+    sleep(10)
+
+    return variables
+
+
 def evaluator(result_state, wf):
-    # Here, we need to decide either to return a single value or a tuple
-    # depending of course on what the optimizer can handle
+
+    wf.change_provider["instance"].applyChange({"terminate": True})
+
     return result_state["avg_overhead"] + result_state["avg_performance"]
 
 
