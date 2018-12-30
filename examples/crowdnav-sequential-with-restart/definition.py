@@ -1,6 +1,5 @@
 import multiprocessing as mpc
 from time import sleep
-from app import Boot
 name = "CrowdNav-Sequential"
 
 execution_strategy = {
@@ -17,7 +16,8 @@ execution_strategy = {
 
 
 def change_event_creator(variables, wf):
-    p1 = mpc.Process(target=Boot.start, args=(wf.process_id, True, False, wf.seed, variables, wf.car_count))
+    from app import Boot
+    p1 = mpc.Process(target=Boot.start, args=(wf.processor_id, True, False, wf.seed, variables, wf.car_count))
     p1.daemon = True
     p1.start()
     sleep(10)

@@ -67,7 +67,7 @@ def rtx_process(folder,seed):
   else:
     config_data = []
 
-    wf.process_id = args.process_id
+    wf.processor_id = args.process_id
     wf.seed = seed
     wf.car_count = args.car_count
 

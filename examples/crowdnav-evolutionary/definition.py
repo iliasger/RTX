@@ -1,13 +1,16 @@
+import multiprocessing as mpc
+from time import sleep
+
 # Evolutionary search for knob values
 name = "CrowdNav-Evolutionary"
 processor_id = 0
 
 execution_strategy = {
-    "parallel_execution_of_individuals": True, # if this is True, CrowdNav should be run with 'python parallel.py <no>'
+    "parallel_execution_of_individuals": False, # if this is True, CrowdNav should be run with 'python parallel.py <no>'
     # where <no> is equal to the "population_size" below
     # the parallel execution creates as many processes as the "population_size" below
     # the non-parallel execution runs everything in the same process.. (good for debugging!)
-    "ignore_first_n_results": 5,  #10000,
+    "ignore_first_n_results": 0,  #10000,
     "sample_size": 10,  #10000,
     "type": "evolutionary",
     # Options: NSGAII, GA, NoveltySearch, RandomSearch
@@ -77,7 +80,19 @@ change_provider = {
 }
 
 
+def change_event_creator(variables, wf):
+    from app import Boot
+    p1 = mpc.Process(target=Boot.start, args=(wf.processor_id, True, False, wf.seed, variables, wf.car_count))
+    p1.daemon = True
+    p1.start()
+    sleep(10)
+
+    return variables
+
 def evaluator(result_state, wf):
+
+    wf.change_provider["instance"].applyChange({"terminate": True})
+
     data_to_save = {}
     data_to_save["overheads"] = result_state["overheads"]
     data_to_save["routings"] = result_state["routings"]
