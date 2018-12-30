@@ -90,6 +90,9 @@ def mutate(individual, variables, range_tuples):
 
 
 # reuse earlier fitness results if the same individual should be evaluated again
+# however and currently, identical individuals generated in the same iteration are evaluated concurrently, and
+# more than once.
+#
 # key is the String representation of the individual (sequences cannot be keys), value is the fitness
 _fitnesses = dict()
 
@@ -106,10 +109,12 @@ def evaluate(individual_and_id, vars, ranges, wf):
         update_topics(wf, individual_and_id[1])
         init_change_provider(wf)
         init_data_providers(wf)
-        fitness = evolutionary_execution(wf, individual_and_id[0], vars)
+        fitness = evolutionary_execution(wf, individual, vars)
         _fitnesses[str(individual)] = fitness
     else:
-        info("> Reuse fitness from earlier evaluation for the individual " + str(individual) + " ...")
+        info("> Reuse fitness " + str(fitness) + " from earlier evaluation for the individual "
+             + str(individual) + " ...")
+        reuse_evaluation(wf, individual, individual_and_id[1], vars, fitness)
 
     if wf.execution_strategy["is_multi_objective"]:
         # fitness is a tuple (avg trip overhead, avg performance)
@@ -126,9 +131,6 @@ def evolutionary_execution(wf, opti_values, variables):
     # once for each experiment and crowdnav instance?
     # This method can be invoked concurrently.
 
-    # TODO should we create new/fresh CrowdNav instances for each iteration/generation?
-    # Otherwise, we use the same instance to evaluate across iterations/generations to evaluate individuals.
-
     """ this is the function we call and that returns a value for optimization """
     knob_object = recreate_knob_from_optimizer_values(variables, opti_values)
     # create a new experiment to run in execution
@@ -141,7 +143,6 @@ def evolutionary_execution(wf, opti_values, variables):
 
 
 def update_topics(wf, crowdnav_id):
-
     if wf.execution_strategy["parallel_execution_of_individuals"]:
         suffix = "-" + str(crowdnav_id)
         wf.processor_id = crowdnav_id
@@ -165,3 +166,18 @@ def recreate_knob_from_optimizer_values(variables, opti_values):
         knob_object[val] = opti_values[idx]
     info(">> knob object " + str(knob_object))
     return knob_object
+
+
+def reuse_evaluation(wf, opti_values, individual_id, vars, fitness):
+    wf.experimentCounter += 1
+    wf.processor_id = individual_id
+    wf.current_knobs = recreate_knob_from_optimizer_values(vars, opti_values)
+    data_to_save = {}
+    data_to_save["avg_overhead"] = fitness[0]
+    data_to_save["avg_routing"] = fitness[1]
+    data_to_save["overheads"] = [-1]
+    data_to_save["routings"] = [-1]
+    wf.db.save_data_for_experiment(wf.experimentCounter, wf.current_knobs, data_to_save, wf.rtx_run_id, wf.processor_id)
+    # Here, we need to decide either to return a single value or a tuple
+    # depending of course on what the optimizer can handle
+    return data_to_save["avg_overhead"], data_to_save["avg_routing"]
