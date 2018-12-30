@@ -11,7 +11,7 @@ execution_strategy = {
     # the parallel execution creates as many processes as the "population_size" below
     # the non-parallel execution runs everything in the same process.. (good for debugging!)
     "ignore_first_n_results": 0,  #10000,
-    "sample_size": 10,  #10000,
+    "sample_size": 50,  #10000,
     "type": "evolutionary",
     # Options: NSGAII, GA, NoveltySearch, RandomSearch
     "optimizer_method": "RandomSearch",  # "GA"  "NoveltySearch"

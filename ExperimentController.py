@@ -67,21 +67,21 @@ def rtx_process(folder,seed):
   else:
     config_data = []
 
-    wf.processor_id = args.process_id
-    wf.seed = seed
-    wf.car_count = args.car_count
+  wf.processor_id = args.process_id
+  wf.seed = seed
+  wf.car_count = args.car_count
 
-    # check for database configuration
-    if "database" in config_data:
-      database_config = config_data["database"]
-      info("> RTX configuration: Using " + database_config["type"] + " database.", Fore.CYAN)
-      db = create_instance(database_config)
-      wf.rtx_run_id = db.save_rtx_run(wf.execution_strategy)
-      wf.db = db
-    else:
-      info("> RTX configuration: No database specified.", Fore.CYAN)
-      wf.rtx_run_id = "-1"
-      wf.db = get_no_database()
+  # check for database configuration
+  if "database" in config_data:
+    database_config = config_data["database"]
+    info("> RTX configuration: Using " + database_config["type"] + " database.", Fore.CYAN)
+    db = create_instance(database_config)
+    wf.rtx_run_id = db.save_rtx_run(wf.execution_strategy)
+    wf.db = db
+  else:
+    info("> RTX configuration: No database specified.", Fore.CYAN)
+    wf.rtx_run_id = "-1"
+    wf.db = get_no_database()
 
   # setting global variable log_folder for logging and clear log
   rtxlib.LOG_FOLDER = wf.folder

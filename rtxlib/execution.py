@@ -103,7 +103,7 @@ def experimentFunction(wf, exp):
         info("> Statistics     | " + str(wf.experimentCounter+1) + "/" + str(wf.totalExperiments)
              + " took " + str(duration) + "ms" + " - remaining ~" + str(
             (wf.totalExperiments - wf.experimentCounter+1) * duration / 1000) + "sec")
-    info("> FullState      | " + str(exp["state"]))
+    # info("> FullState      | " + str(exp["state"]))
     info("> ResultValue    | " + str(result))
     # log the result values into a csv file
     log_results(wf.folder, exp["knobs"].values() + [result])
