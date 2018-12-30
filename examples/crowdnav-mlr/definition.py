@@ -7,6 +7,7 @@ execution_strategy = {
     "type": "mlr_mbo",
     "optimizer_iterations": 5,
     "optimizer_iterations_in_design": 10,
+    "population_size": 5,
     "acquisition_method": "aei",  # mr, se, cb, aei, eqi. check http://mlrmbo.mlr-org.com/reference/infillcrits.html
     "knobs": {
         "route_random_sigma": (0.0, 1.0)
