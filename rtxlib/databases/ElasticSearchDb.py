@@ -138,6 +138,20 @@ class ElasticSearchDb(Database):
         except ConnectionError:
             error("Error while saving data point data in elasticsearch. Check connection to elasticsearch.")
 
+    # Insert performance metrics into database - postprocessed
+    # %proc, RAM (kb), %E, %S, %U
+    def insert_metrics(self, run_id, metrics):
+      body = dict()
+      body["processor_usage"] = metrics[0]
+      body["ram_usage_kb"]    = metrics[1]
+      body["real_time"]       = metrics[2]
+      body["system_time"]     = metrics[3]
+      body["user_time"]       = metrics[4]
+
+      try:
+        self.es.index(run_id, self.data_point_type_name, body, "performance_metrics", parent=run_id)
+      except ConnectionError:
+        error("Error while saving performance metrics in elasticsearch. Check connection to elasticsearch.")
 
     def get_data_points(self, rtx_run_id, exp_run):
         query = {

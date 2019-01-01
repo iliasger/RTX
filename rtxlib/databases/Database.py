@@ -36,6 +36,10 @@ class Database:
         """ called for saving all data collected in an experiment in a batch"""
         pass
 
+    def insert_metrics(self, rtx_run_id, metrics):
+        """ called to save post-processed performance metrics """
+        pass
+
     def get_data_points(self, rtx_run_id, exp_run):
         """ called for getting all the data points corresponding to an analytis run """
         pass
