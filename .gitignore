@@ -20,3 +20,4 @@ oeda_config.json
 results/
 results-CrowdNav/
 /raw_data/*.pickle
+outputs/
