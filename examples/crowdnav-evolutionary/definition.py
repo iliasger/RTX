@@ -17,8 +17,8 @@ execution_strategy = {
     "optimizer_method": "RandomSearch",  # "GA"  "NoveltySearch"
     "is_multi_objective": True,
     "optimizer_iterations": 1,  # number of generations
-    "population_size": 5,      # number of individuals in the population
-    "offspring_size": 5,        # typically equals the population size
+    "population_size": 2,      # number of individuals in the population
+    "offspring_size": 2,        # typically equals the population size
     "crossover_probability": 0.7,
     "mutation_probability": 0.3,
     "novelty_archive_percent": 0.2, # % of population to keep in the archive

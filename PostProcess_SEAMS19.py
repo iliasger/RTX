@@ -9,7 +9,7 @@ import os, sys, elasticsearch, json
 from rtxlib.databases import create_instance
 from rtxlib.databases import get_no_database
 
-assert(len(sys.argv) == 2), "Required argument: *.output file!"
+assert(len(sys.argv) == 4), "Required arguments: *.output file and seed!"
 assert(os.path.isfile(sys.argv[1])), "File [%s] not found!" % sys.argv[1]
 assert(os.path.isfile('oeda_config.json')), 'Database config file not found!'
 
@@ -35,6 +35,6 @@ with open(sys.argv[1]) as f:
     database_config = config_data["database"]
     print("> [Postprocess] RTX configuration: Using " + database_config["type"] + " database.")
     db = create_instance(database_config)
-    db.insert_metrics(database_config["index"]["name"], performance_metrics)
+    db.insert_metrics(database_config["index"]["name"], performance_metrics, sys.argv[2], sys.argv[3])
   else:
     print("Database error.")

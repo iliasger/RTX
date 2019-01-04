@@ -94,10 +94,11 @@ class ElasticSearchDb(Database):
         except ConnectionError:
             error("Error while updating target system in_use flag in elasticsearch. Check connection to elasticsearch.")
 
-    def save_rtx_run(self, strategy):
+    def save_rtx_run(self, strategy, seed):
         body = dict()
         body["strategy"] = strategy
         body["created"] = datetime.now()
+        body["seed"] = seed
         try:
             res = self.es.index(self.index, self.rtx_run_type_name, body)
             return res['_id']
@@ -140,16 +141,20 @@ class ElasticSearchDb(Database):
 
     # Insert performance metrics into database - postprocessed
     # %proc, RAM (kb), %E, %S, %U
-    def insert_metrics(self, run_id, metrics):
+    def insert_metrics(self, run_id, metrics, seed, experiment_name):
       body = dict()
       body["processor_usage"] = metrics[0]
       body["ram_usage_kb"]    = metrics[1]
       body["real_time"]       = metrics[2]
       body["system_time"]     = metrics[3]
       body["user_time"]       = metrics[4]
+      body["seed"]            = seed
+      body["experiment_name"] = experiment_name
+
+      name = "performance_metrics_" + experiment_name + "_" + seed
 
       try:
-        self.es.index(run_id, self.data_point_type_name, body, "performance_metrics", parent=run_id)
+        self.es.index(run_id, self.data_point_type_name, body, name, parent=run_id)
       except ConnectionError:
         error("Error while saving performance metrics in elasticsearch. Check connection to elasticsearch.")
 

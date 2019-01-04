@@ -26,7 +26,7 @@ from rtxlib.databases import get_no_database
 
 # Handle arguments
 parser = argparse.ArgumentParser(description='SEAMS2019 Experiment Controller.')
-#parser.add_argument('--seed', help='Initializes random seed. Random seed if left blank.', type=int)
+parser.add_argument('--seed', help='Initializes random seed. Random seed if left blank.', type=int)
 parser.add_argument('--experiment', help='Path to experiment folder.', default='examples/crowdnav-bayesian-multi-objective')
 parser.add_argument('--num_replicates', help='Number of experimental replicates.', type=int, default=30)
 parser.add_argument('--car_count', help='Number of cars.', type=int, default=500)
@@ -76,7 +76,7 @@ def rtx_process(folder,seed):
     database_config = config_data["database"]
     info("> RTX configuration: Using " + database_config["type"] + " database.", Fore.CYAN)
     db = create_instance(database_config)
-    wf.rtx_run_id = db.save_rtx_run(wf.execution_strategy)
+    wf.rtx_run_id = db.save_rtx_run(wf.execution_strategy, seed)
     wf.db = db
   else:
     info("> RTX configuration: No database specified.", Fore.CYAN)
@@ -90,6 +90,8 @@ def rtx_process(folder,seed):
 
   execute_workflow(wf)
 
+  return wf.rtx_run_id
+
 
 if __name__ == '__main__':
   args = parser.parse_args()
@@ -99,14 +101,25 @@ if __name__ == '__main__':
   if args.process_id > 0:
     parallelMode = True
 
+  print "======================================================"
+  print "REPLICATE [%d]" % args.seed
+  print "======================================================"
+
+  rtx_run_id = rtx_process(args.experiment, args.seed)
+
+  # """ Run RTX """
+  # p2 = mpc.Process(target=rtx_process, args=(args.experiment,args.seed,))
+  # p2.start()
+  # p2.join()
+
   # Loop for the required number of iterations
-  for i in range(args.num_replicates):
-
-    print "======================================================"
-    print "REPLICATE [%d]" % i
-    print "======================================================"
-
-    """ Run RTX """
-    p2 = mpc.Process(target=rtx_process, args=(args.experiment,i,))
-    p2.start()
-    p2.join()
+  # for i in range(args.num_replicates):
+  #
+  #   print "======================================================"
+  #   print "REPLICATE [%d]" % i
+  #   print "======================================================"
+  #
+  #   """ Run RTX """
+  #   p2 = mpc.Process(target=rtx_process, args=(args.experiment,i,))
+  #   p2.start()
+  #   p2.join()
