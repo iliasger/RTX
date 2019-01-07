@@ -11,14 +11,14 @@ execution_strategy = {
     # the parallel execution creates as many processes as the "population_size" below
     # the non-parallel execution runs everything in the same process.. (good for debugging!)
     "ignore_first_n_results": 0,  #10000,
-    "sample_size": 50,  #10000,
+    "sample_size": 5000,  #10000,
     "type": "evolutionary",
     # Options: NSGAII, GA, NoveltySearch, RandomSearch
     "optimizer_method": "RandomSearch",  # "GA"  "NoveltySearch"
     "is_multi_objective": True,
-    "optimizer_iterations": 1,  # number of generations
-    "population_size": 2,      # number of individuals in the population
-    "offspring_size": 2,        # typically equals the population size
+    "optimizer_iterations": 10,  # number of generations
+    "population_size": 10,      # number of individuals in the population
+    "offspring_size": 10,        # typically equals the population size
     "crossover_probability": 0.7,
     "mutation_probability": 0.3,
     "novelty_archive_percent": 0.2, # % of population to keep in the archive
