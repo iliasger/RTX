@@ -9,6 +9,7 @@ do
     (/usr/bin/time -f '%P %M %E %S %U' python ExperimentController.py --seed $i --experiment examples/$3/) &> $OUTPUT_FILE &
     #(gtime -f '%P %M %E %S %U' python ExperimentController.py --seed $i --experiment examples/$3/) &> $OUTPUT_FILE &
     pids[${i}]=$!
+    sleep 5
 done
 
 # Wait for each PID to complete
