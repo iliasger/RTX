@@ -56,7 +56,7 @@ def random_search(variables, range_tuples, init_individual, mutate, evaluate, wf
         gen_index = gen * number_individuals_to_evaluate_in_batch
         # select only the relevant batch from the whole population to evaluate
         batch = pop[gen_index:gen_index+number_individuals_to_evaluate_in_batch]
-        zipped = zip(batch, range(number_individuals_to_evaluate_in_batch))
+        zipped = zip(batch, range(number_individuals_to_evaluate_in_batch), [gen]*number_individuals_to_evaluate_in_batch)
         if wf.execution_strategy["parallel_execution_of_individuals"]:
             fitnesses = pool.map(toolbox.evaluate, zipped)
         else:

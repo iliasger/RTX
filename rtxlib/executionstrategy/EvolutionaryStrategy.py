@@ -102,6 +102,10 @@ def evaluate(individual_and_id, vars, ranges, wf):
     # retrieve fitness from dict (earlier evaluation)
     fitness = _fitnesses.get(str(individual), None)
 
+    # here we save the individual id so that it ends up to the db
+    wf.individual_id = individual_and_id[1]
+    wf.iteration_id = individual_and_id[2]
+
     if fitness is None:
         info("> Compute fitness for the individual " + str(individual) + " ...")
         # fitness of the individual is unknown, so compute it and add it to the dict
@@ -147,7 +151,7 @@ def update_topics(wf, crowdnav_id):
         suffix = "-" + str(crowdnav_id)
         wf.processor_id = crowdnav_id
     else:
-        suffix = "-0"
+        suffix = "-" + str(wf.seed)
 
     wf.primary_data_provider["topic"] = original_primary_data_provider_topic + suffix
     wf.secondary_data_providers[0]["topic"] = original_secondary_data_provider_topic + suffix

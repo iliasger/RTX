@@ -71,7 +71,7 @@ def novelty_search(variables, range_tuples, init_individual, mutate, evaluate, w
     # Evaluate the entire population
     number_individuals_to_evaluate_in_parallel = wf.execution_strategy["population_size"]
     pool = pathos.multiprocessing.ProcessPool(number_individuals_to_evaluate_in_parallel)
-    zipped = zip(pop, range(number_individuals_to_evaluate_in_parallel))
+    zipped = zip(pop, range(number_individuals_to_evaluate_in_parallel), [0]*number_individuals_to_evaluate_in_parallel)
     if wf.execution_strategy["parallel_execution_of_individuals"]:
         fitnesses = pool.map(toolbox.evaluate, zipped)
     else:
@@ -84,7 +84,7 @@ def novelty_search(variables, range_tuples, init_individual, mutate, evaluate, w
     # Calculate initial novelty archive
     novelty_archive = calculate_novelty(0, pop, novelty_archive_k, novelty_archive, novelty_weight, fitness_weight)
 
-    for g in range(optimizer_iterations):
+    for g in range(1, optimizer_iterations):
         info("> \n" + str(g) + ". Generation")
         # Select the next generation individuals
         offspring = toolbox.select(pop, len(pop))
@@ -105,7 +105,7 @@ def novelty_search(variables, range_tuples, init_individual, mutate, evaluate, w
 
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        zipped = zip(invalid_ind,range(number_individuals_to_evaluate_in_parallel))
+        zipped = zip(invalid_ind,range(number_individuals_to_evaluate_in_parallel), [g]*number_individuals_to_evaluate_in_parallel)
         if wf.execution_strategy["parallel_execution_of_individuals"]:
             fitnesses = pool.map(toolbox.evaluate, zipped)
         else:

@@ -77,7 +77,7 @@ def nsga2(variables, range_tuples, init_individual, mutate, evaluate, wf):
     # Evaluate the entire population - no individual has a fitness yet
     number_individuals_to_evaluate_in_parallel = wf.execution_strategy["population_size"]
     pool = pathos.multiprocessing.ProcessPool(number_individuals_to_evaluate_in_parallel)
-    zipped = zip(population, range(number_individuals_to_evaluate_in_parallel))
+    zipped = zip(population, range(number_individuals_to_evaluate_in_parallel), [0]*number_individuals_to_evaluate_in_parallel)
     if wf.execution_strategy["parallel_execution_of_individuals"]:
         fitnesses = pool.map(toolbox.evaluate, zipped)
     else:
@@ -111,7 +111,7 @@ def nsga2(variables, range_tuples, init_individual, mutate, evaluate, wf):
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         number_individuals_to_evaluate_in_parallel = len(invalid_ind)
         pool = pathos.multiprocessing.ProcessPool(number_individuals_to_evaluate_in_parallel)
-        zipped = zip(invalid_ind, range(number_individuals_to_evaluate_in_parallel))
+        zipped = zip(invalid_ind, range(number_individuals_to_evaluate_in_parallel), [gen]*number_individuals_to_evaluate_in_parallel)
         if wf.execution_strategy["parallel_execution_of_individuals"]:
             fitnesses = pool.map(toolbox.evaluate, zipped)
         else:

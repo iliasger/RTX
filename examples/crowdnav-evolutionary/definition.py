@@ -82,7 +82,7 @@ change_provider = {
 
 def change_event_creator(variables, wf):
     from app import Boot
-    p1 = mpc.Process(target=Boot.start, args=(wf.processor_id, True, False, wf.seed, variables, wf.car_count))
+    p1 = mpc.Process(target=Boot.start, args=(wf.seed, True, False, wf.seed, variables, wf.car_count))
     p1.daemon = True
     p1.start()
     sleep(10)
@@ -96,7 +96,7 @@ def evaluator(result_state, wf):
     data_to_save = {}
     data_to_save["overheads"] = result_state["overheads"]
     data_to_save["routings"] = result_state["routings"]
-    wf.db.save_data_for_experiment(wf.experimentCounter, wf.current_knobs, data_to_save, wf.rtx_run_id, wf.processor_id)
+    wf.db.save_data_for_experiment(wf.iteration_id, wf.current_knobs, data_to_save, wf.rtx_run_id, wf.individual_id)
     # Here, we need to decide either to return a single value or a tuple
     # depending of course on what the optimizer can handle
     return result_state["avg_overhead"], result_state["avg_routing"]
