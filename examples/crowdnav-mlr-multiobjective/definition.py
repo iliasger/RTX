@@ -9,9 +9,9 @@ execution_strategy = {
     "ignore_first_n_results": 0,
     "sample_size": 50,
     "type": "mlr_mbo",
-    "optimizer_iterations": 10,
-    "optimizer_iterations_in_design": 3,
-    "population_size": 10,
+    "optimizer_iterations": 12,
+    "optimizer_iterations_in_design": 8,
+    "population_size": 1,
     "objectives_number": 2,
     "knobs": {
         "route_random_sigma": (0.0, 0.3),
@@ -44,7 +44,7 @@ def routing_performance_data_reducer(state, new_data, wf):
 primary_data_provider = {
     "type": "kafka_consumer",
     "kafka_uri": "kafka:9092",
-    "topic": "crowd-nav-trips-0",
+    "topic": "crowd-nav-trips",
     "serializer": "JSON",
     "data_reducer": primary_data_reducer
 }
@@ -53,7 +53,7 @@ secondary_data_providers = [
     {
         "type": "kafka_consumer",
         "kafka_uri": "kafka:9092",
-        "topic": "crowd-nav-routing-0",
+        "topic": "crowd-nav-routing",
         "serializer": "JSON",
         "data_reducer": routing_performance_data_reducer
     }
@@ -61,14 +61,14 @@ secondary_data_providers = [
 change_provider = {
     "type": "kafka_producer",
     "kafka_uri": "kafka:9092",
-    "topic": "crowd-nav-commands-0",
+    "topic": "crowd-nav-commands",
     "serializer": "JSON",
 }
 
 
 def change_event_creator(variables, wf):
     from app import Boot
-    p1 = mpc.Process(target=Boot.start, args=(wf.processor_id, True, False, wf.seed, variables, wf.car_count))
+    p1 = mpc.Process(target=Boot.start, args=(wf.seed, True, False, wf.seed, variables, wf.car_count))
     p1.daemon = True
     p1.start()
     sleep(10)
@@ -83,9 +83,9 @@ def evaluator(result_state, wf):
     data_to_save = {}
     data_to_save["overheads"] = result_state["overheads"]
     data_to_save["routings"] = result_state["routings"]
-    wf.db.save_data_for_experiment(wf.experimentCounter, wf.current_knobs, data_to_save, wf.rtx_run_id, wf.processor_id)
+    wf.db.save_data_for_experiment(wf.experimentCounter, wf.current_knobs, data_to_save, wf.rtx_run_id, 0)
 
-    return result_state["avg_overhead"], result_state["avg_performance"]
+    return result_state["avg_overhead"], result_state["avg_routing"]
 
 
 def state_initializer(state, wf):

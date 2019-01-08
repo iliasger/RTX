@@ -51,7 +51,8 @@ def random_search(variables, range_tuples, init_individual, mutate, evaluate, wf
 
     # Evaluate the entire population, in batches
     number_individuals_to_evaluate_in_batch = wf.execution_strategy["population_size"]
-    pool = pathos.multiprocessing.ProcessPool(number_individuals_to_evaluate_in_batch)
+    if wf.execution_strategy["parallel_execution_of_individuals"]:
+        pool = pathos.multiprocessing.ProcessPool(number_individuals_to_evaluate_in_batch)
     for gen in range(optimizer_iterations):
         gen_index = gen * number_individuals_to_evaluate_in_batch
         # select only the relevant batch from the whole population to evaluate

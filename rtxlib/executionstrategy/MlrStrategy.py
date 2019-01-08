@@ -31,6 +31,8 @@ def start_mlr_mbo_strategy(wf):
         objectives_number = 1
     population_size = wf.execution_strategy["population_size"]
 
+    update_topics(wf)
+
     # we look at the ranges the user has specified in the knobs
     knobs = wf.execution_strategy["knobs"]
     info("> Initial knobs   | " + str(knobs), Fore.CYAN)
@@ -266,3 +268,24 @@ def recreate_knob_from_optimizer_values(knobs_and_results):
     knobs_and_results = sorted(knobs_and_results, key=lambda x: x[1])
     info("sorted knobs_and_results | " + str(knobs_and_results))
     return knobs_and_results[0][0], knobs_and_results[0][1] # 0: knob_object, 1: value
+
+
+def update_topics(wf):
+
+    suffix = "-" + str(wf.seed)
+
+    original_primary_data_provider_topic = wf.primary_data_provider["topic"]
+    original_secondary_data_provider_topic = wf.secondary_data_providers[0]["topic"]
+    original_change_provider_topic = wf.change_provider["topic"]
+
+    wf.primary_data_provider["topic"] = original_primary_data_provider_topic + suffix
+    wf.primary_data_provider["instance"].topic = original_primary_data_provider_topic + suffix
+    wf.secondary_data_providers[0]["topic"] = original_secondary_data_provider_topic + suffix
+    wf.secondary_data_providers[0]["instance"].topic = original_secondary_data_provider_topic + suffix
+    wf.secondary_data_providers[0]["instance"].reset()
+    wf.change_provider["topic"] = original_change_provider_topic + suffix
+    wf.change_provider["instance"].topic = original_change_provider_topic + suffix
+
+    info("Listening to " + wf.primary_data_provider["topic"])
+    info("Listening to " + wf.secondary_data_providers[0]["topic"])
+    info("Posting changes to " + wf.change_provider["topic"])

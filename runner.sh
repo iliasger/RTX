@@ -18,6 +18,7 @@ done
 
 # Postprocess
 for ((i = $1; i <= $2; i++)); do
+  OUTPUT_FILE=outputs/$3_$i.output
   python PostProcess_SEAMS19.py $OUTPUT_FILE $i $3
 done
 
