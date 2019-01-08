@@ -7,9 +7,9 @@ id = 1
 
 execution_strategy = {
     "ignore_first_n_results": 0,
-    "sample_size": 50,
+    "sample_size": 5000,
     "type": "mlr_mbo",
-    "optimizer_iterations": 12,
+    "optimizer_iterations": 92,
     "optimizer_iterations_in_design": 8,
     "population_size": 1,
     "objectives_number": 2,
@@ -21,6 +21,15 @@ execution_strategy = {
         "freshness_update_factor": (5, 20),
         "freshness_cut_off_value": (100, 700),
         "re_route_every_ticks": (10, 70)
+    },
+    "knob_types": {
+        "route_random_sigma": "real",
+        "exploration_percentage": "real",
+        "max_speed_and_length_factor": "real",
+        "average_edge_duration_factor": "real",
+        "freshness_update_factor": "int",
+        "freshness_cut_off_value": "int",
+        "re_route_every_ticks": "int"
     }
 }
 

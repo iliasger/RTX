@@ -35,6 +35,7 @@ def start_mlr_mbo_strategy(wf):
 
     # we look at the ranges the user has specified in the knobs
     knobs = wf.execution_strategy["knobs"]
+    knob_types = wf.execution_strategy["knob_types"]
     info("> Initial knobs   | " + str(knobs), Fore.CYAN)
 
     # we create a list of variable names and a list of knob (min, max)
@@ -42,10 +43,12 @@ def start_mlr_mbo_strategy(wf):
     for key in knobs:
         knob_object = dict()
         knob_object["name"] = key
-        min_value = min(float(knobs[key][0]), float(knobs[key][1]))
-        max_value = max(float(knobs[key][0]), float(knobs[key][1]))
+        min_value = min(knobs[key][0], knobs[key][1])
+        max_value = max(knobs[key][0], knobs[key][1])
+        type = knob_types[key]
         knob_object["min"] = min_value
         knob_object["max"] = max_value
+        knob_object["type"] = type
         json_array.append(knob_object)
     request_body = dict(
         id=wf.id,
