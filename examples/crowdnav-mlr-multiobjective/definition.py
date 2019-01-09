@@ -3,7 +3,6 @@ from time import sleep
 
 # first run 'Rscript start_R_server.R' in https://github.com/alinaciuysal/mlrMBO-API
 name = "MLR-MBO bayesian optimization - multiobjective"
-id = 1
 
 execution_strategy = {
     "ignore_first_n_results": 0,

@@ -51,7 +51,7 @@ def start_mlr_mbo_strategy(wf):
         knob_object["type"] = type
         json_array.append(knob_object)
     request_body = dict(
-        id=wf.id,
+        id=wf.rtx_run_id,
         wf=dict(
             acquisition_method=acquisition_method,
             optimizer_iterations=optimizer_iterations,
@@ -111,7 +111,7 @@ def initiate_mlr_mbo(wf, request_body, objectives_number):
 def update_initial_design(wf, initial_design_values, objectives_number):
     try:
         body = dict(
-            id=wf.id,
+            id=wf.rtx_run_id,
             initial_design_values=initial_design_values
         )
         api = host_with_port + "/mlrMBO/initialDesign/update"
@@ -140,7 +140,7 @@ def create_artifacts(wf, objectives_number):
         # keeps track of all knobs that have been used in experimentation and find best one
         knobs_and_results = []
         body = dict(
-            id=wf.id
+            id=wf.rtx_run_id
         )
         api = host_with_port + "/mlrMBO/createArtifacts"
         r = requests.post(api, data=json.dumps(body), headers=header)
@@ -189,7 +189,7 @@ def create_artifacts(wf, objectives_number):
 def update_mbo_state(wf, proposed_points, value):
     try:
         body = dict(
-            id=wf.id,
+            id=wf.rtx_run_id,
             knobs=proposed_points,
             value=value
         )
@@ -211,7 +211,7 @@ def update_mbo_state(wf, proposed_points, value):
 def get_proposed_points(wf):
     try:
         body = dict(
-            id=wf.id
+            id=wf.rtx_run_id
         )
         api = host_with_port + "/mlrMBO/model/getProposedPoint"
         r = requests.post(api, data=json.dumps(body), headers=header)
@@ -242,7 +242,7 @@ def create_experiment_tuple(wf, knobs):
 def finalize_optimization(wf):
     try:
         body = dict(
-            id=wf.id
+            id=wf.rtx_run_id
         )
         api = host_with_port + "/mlrMBO/finalize"
         r = requests.post(api, data=json.dumps(body), headers=header)
