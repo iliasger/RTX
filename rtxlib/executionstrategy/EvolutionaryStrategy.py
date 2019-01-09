@@ -118,7 +118,7 @@ def evaluate(individual_and_id, vars, ranges, wf):
     else:
         info("> Reuse fitness " + str(fitness) + " from earlier evaluation for the individual "
              + str(individual) + " ...")
-        reuse_evaluation(wf, individual, individual_and_id[1], vars, fitness)
+        reuse_evaluation(wf, individual, vars, fitness)
 
     if wf.execution_strategy["is_multi_objective"]:
         # fitness is a tuple (avg trip overhead, avg performance)
@@ -172,16 +172,17 @@ def recreate_knob_from_optimizer_values(variables, opti_values):
     return knob_object
 
 
-def reuse_evaluation(wf, opti_values, individual_id, vars, fitness):
+def reuse_evaluation(wf, opti_values, vars, fitness):
     wf.experimentCounter += 1
-    wf.processor_id = individual_id
+    # wf.processor_id = individual_id
     wf.current_knobs = recreate_knob_from_optimizer_values(vars, opti_values)
     data_to_save = {}
     data_to_save["avg_overhead"] = fitness[0]
     data_to_save["avg_routing"] = fitness[1]
     data_to_save["overheads"] = [-1]
     data_to_save["routings"] = [-1]
-    wf.db.save_data_for_experiment(wf.experimentCounter, wf.current_knobs, data_to_save, wf.rtx_run_id, wf.processor_id)
+    # wf.db.save_data_for_experiment(wf.experimentCounter, wf.current_knobs, data_to_save, wf.rtx_run_id, wf.processor_id)
+    wf.db.save_data_for_experiment(wf.iteration_id, wf.current_knobs, data_to_save, wf.rtx_run_id, wf.individual_id)
     # Here, we need to decide either to return a single value or a tuple
     # depending of course on what the optimizer can handle
     return data_to_save["avg_overhead"], data_to_save["avg_routing"]
