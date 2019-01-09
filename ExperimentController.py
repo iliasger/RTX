@@ -84,8 +84,8 @@ def rtx_process(folder,seed):
     wf.db = get_no_database()
 
   # setting global variable log_folder for logging and clear log
-  rtxlib.LOG_FOLDER = wf.folder
-  rtxlib.clearOldLog()
+  # rtxlib.LOG_FOLDER = wf.folder
+  # rtxlib.clearOldLog()
   info("> Starting RTX experiment...")
 
   execute_workflow(wf)

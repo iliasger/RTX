@@ -267,9 +267,9 @@ def recreate_knob_from_optimizer_values(knobs_and_results):
     """ recreates knob values from a variable
         independent of criteria for data type (minimization, maximization), we will get minimal result
         because it's already handled it in wf.evaluator """
-    info("knobs_and_results | " + str(knobs_and_results))
+    # info("knobs_and_results | " + str(knobs_and_results))
     knobs_and_results = sorted(knobs_and_results, key=lambda x: x[1])
-    info("sorted knobs_and_results | " + str(knobs_and_results))
+    # info("sorted knobs_and_results | " + str(knobs_and_results))
     return knobs_and_results[0][0], knobs_and_results[0][1] # 0: knob_object, 1: value
 
 
