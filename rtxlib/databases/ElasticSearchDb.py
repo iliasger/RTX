@@ -192,6 +192,7 @@ class ElasticSearchDb(Database):
 
         rtx_runs = list()
         data = list()
+        performance_data = list()
 
         for doc in scan(self.es,
                         query={"query": {"match_all": {}}},
@@ -209,10 +210,11 @@ class ElasticSearchDb(Database):
                         doc_type=self.data_point_type_name):
             res = dict()
             res["parent"] = doc["_parent"]
-            res["payload"] = doc["_source"]["payload"]
-            res["knobs"] = doc["_source"]["knobs"]
-            res["iteration"] = doc["_source"]["iteration"]
-            res["individual"] = doc["_source"]["individual"]
-            data.append(res)
+            res["_source"] = doc["_source"]
 
-        return rtx_runs, data
+            if "seed" in doc["_source"]:
+                performance_data.append(res)
+            else:
+                data.append(res)
+
+        return rtx_runs, data, performance_data
