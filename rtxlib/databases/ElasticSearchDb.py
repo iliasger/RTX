@@ -202,6 +202,7 @@ class ElasticSearchDb(Database):
             res["id"] = doc["_id"]
             res["strategy"] = doc["_source"]["strategy"]
             res["time"] = doc["_source"]["created"]
+            res["seed"] = doc["_source"]["seed"]
             rtx_runs.append(res)
 
         for doc in scan(self.es,
