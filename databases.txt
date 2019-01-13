@@ -30,3 +30,34 @@ The 21 documents are
    - 1 document of the rtx_run (workflow run) that was performed.
 
 When creating the 'rtx' index in the Kibana interface, select the option "I don't want to use the time filter".
+
+
+HOW TO DELETE DOCUMENTS FROM ELASTICSEARCH
+
+(1) Find the ID of the rtx_run (e.g. from jupyter), issue the following (e.g. on Kibana's "Dev Tools" panel):
+
+POST <index>/_delete_by_query/
+{
+  "query": {
+    "parent_id" : {
+      "type": "data_point",
+      "id" : "<id of rtx run>"
+    }
+  }
+}
+
+The above will delete all data documents for that run.
+
+(2) Find the seed number of the rtx_run, issue the following (e.g. on Kibana's "Dev Tools" panel):
+
+POST <index>/_delete_by_query/
+{
+  "query": {
+    "match": {
+      "seed": "<seed_number>"
+    }
+  }
+}
+
+The above will delete both the document representing the run (parent) and the document with the performance metrics,
+if such document exists.
