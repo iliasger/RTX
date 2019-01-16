@@ -3,6 +3,8 @@
     "type": "elasticsearch",
     "host": "localhost",
     "port": 9200,
+    "user_name": "",
+    "user_password": "",
     "index": {
       "name": "rtx",
       "settings" : {
