@@ -1,5 +1,6 @@
 import multiprocessing as mpc
 from time import sleep
+from numpy import median
 
 # Evolutionary search for knob values
 name = "CrowdNav-Evolutionary"
@@ -38,19 +39,11 @@ execution_strategy = {
 
 def overhead_data_reducer(state, new_data, wf):
     state["overheads"].append(new_data["overhead"])
-    cnt = state["count_overhead"]
-    # wf.db.save_data_point(wf.experimentCounter, wf.current_knobs, new_data, state["count_routing"], wf.rtx_run_id, "routing", wf.processor_id)
-    state["avg_overhead"] = (state["avg_overhead"] * cnt + new_data["overhead"]) / (cnt + 1)
-    state["count_overhead"] = cnt + 1
     return state
 
 
 def routing_performance_data_reducer(state, new_data, wf):
     state["routings"].append(new_data["duration"])
-    cnt = state["count_routing"]
-    # wf.db.save_data_point(wf.experimentCounter, wf.current_knobs, new_data, state["count_routing"], wf.rtx_run_id, "routing", wf.processor_id)
-    state["avg_routing"] = (state["avg_routing"] * cnt + new_data["duration"]) / (cnt + 1)
-    state["count_routing"] = cnt + 1
     return state
 
 
@@ -96,10 +89,14 @@ def evaluator(result_state, wf):
     data_to_save = {}
     data_to_save["overheads"] = result_state["overheads"]
     data_to_save["routings"] = result_state["routings"]
+
+    data_to_save["median_overhead"] = median(result_state["overheads"])
+    data_to_save["median_routing"] = median(result_state["routings"])
+
     wf.db.save_data_for_experiment(wf.iteration_id, wf.current_knobs, data_to_save, wf.rtx_run_id, wf.individual_id)
-    # Here, we need to decide either to return a single value or a tuple
-    # depending of course on what the optimizer can handle
-    return result_state["avg_overhead"], result_state["avg_routing"]
+
+    return data_to_save["median_overhead"], data_to_save["median_routing"]
+
 
 
 def state_initializer(state, wf):
