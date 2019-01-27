@@ -12,7 +12,8 @@ from elasticsearch.helpers import scan
 class ElasticSearchDb(Database):
 
     def __init__(self, db_config):
-        self.es = Elasticsearch([{"host": db_config["host"], "port": db_config["port"]}])
+        
+        self.es = Elasticsearch([{"host": db_config["host"], "port": db_config["port"]}], http_auth=(db_config["user_name"], db_config["user_password"]))
 
         if not self.es.ping():
             error("cannot connect to elasticsearch cluster. Check database configuration in config.json.")
