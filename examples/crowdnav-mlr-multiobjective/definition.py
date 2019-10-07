@@ -1,5 +1,6 @@
 import multiprocessing as mpc
 from time import sleep
+from numpy import median
 
 # first run 'Rscript start_R_server.R' in https://github.com/alinaciuysal/mlrMBO-API
 name = "MLR-MBO bayesian optimization - multiobjective"
@@ -35,17 +36,11 @@ execution_strategy = {
 
 def primary_data_reducer(state, new_data, wf):
     state["overheads"].append(new_data["overhead"])
-    cnt = state["count_overhead"]
-    state["avg_overhead"] = (state["avg_overhead"] * cnt + new_data["overhead"]) / (cnt + 1)
-    state["count_overhead"] = cnt + 1
     return state
 
 
 def routing_performance_data_reducer(state, new_data, wf):
     state["routings"].append(new_data["duration"])
-    cnt = state["count_routing"]
-    state["avg_routing"] = (state["avg_routing"] * cnt + new_data["duration"]) / (cnt + 1)
-    state["count_routing"] = cnt + 1
     return state
 
 
@@ -91,16 +86,16 @@ def evaluator(result_state, wf):
     data_to_save = {}
     data_to_save["overheads"] = result_state["overheads"]
     data_to_save["routings"] = result_state["routings"]
+
+    data_to_save["median_overhead"] = median(result_state["overheads"])
+    data_to_save["median_routing"] = median(result_state["routings"])
+
     wf.db.save_data_for_experiment(wf.experimentCounter, wf.current_knobs, data_to_save, wf.rtx_run_id, 0)
 
-    return result_state["avg_overhead"], result_state["avg_routing"]
+    return data_to_save["median_overhead"], data_to_save["median_routing"]
 
 
 def state_initializer(state, wf):
     state["overheads"] = []
     state["routings"] = []
-    state["count_routing"] = 0
-    state["count_overhead"] = 0
-    state["avg_overhead"] = 0
-    state["avg_routing"] = 0
     return state
